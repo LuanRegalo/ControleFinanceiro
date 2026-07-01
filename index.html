@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle Financeiro — Acesso Restrito</title>
+    <title>Controle Financeiro — Acesso Restrito (Demonstração)</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -64,6 +64,11 @@
             color: var(--white); cursor: pointer; text-transform: uppercase; box-shadow: 0 0 15px rgba(0,168,89,0.4);
         }
         .login-btn:hover { background: linear-gradient(135deg, #00c76a, #008a48); }
+        .danger-btn {
+            background: linear-gradient(135deg, var(--red), #8b0000);
+            box-shadow: 0 0 15px rgba(206,43,55,0.4);
+        }
+        .danger-btn:hover { background: linear-gradient(135deg, #ff2d4a, #a00000); }
         .error-msg { color: var(--red); font-size: 0.8rem; min-height: 20px; margin-top: 10px; }
         .main-container {
             position: relative; z-index: 10; width: 90%; max-width: 650px; padding: 40px 35px;
@@ -108,6 +113,15 @@
         .bairros-table th { color: var(--green); font-size: 0.7rem; letter-spacing: 2px; }
         .bairros-table button { background: rgba(206,43,55,0.2); border: 1px solid rgba(206,43,55,0.5); color: var(--red); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
         textarea.futuristic-input { height: 100px; resize: vertical; }
+        .admin-section { display: none; }
+        .admin-section.visible { display: block; }
+        .confirm-box { text-align: center; max-width: 350px; padding: 30px; }
+        .confirm-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 20px; }
+        .confirm-btn { padding: 12px 24px; border-radius: 8px; font-family: 'Orbitron'; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; }
+        .confirm-btn.yes { background: var(--red); color: white; }
+        .confirm-btn.no { background: #333; color: white; }
+        .comandas-list { max-height: 200px; overflow-y: auto; margin-top: 10px; }
+        .comanda-item { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.8rem; }
         @media (max-width: 600px) { .main-container { padding: 25px 18px; } .main-title { font-size: 1.3rem; } }
     </style>
 </head>
@@ -143,45 +157,66 @@
             <li class="list-item" id="itemDiasRodados"><div class="item-indicator">📅</div><div class="item-content"><div class="item-title">Dias Rodados</div><div class="item-desc" id="diasRodadosInfo"></div></div><span class="item-arrow">▶</span></li>
             <li class="list-item" id="itemDiariasTaxas"><div class="item-indicator">💲</div><div class="item-content"><div class="item-title">Diárias e Taxas</div><div class="item-desc" id="diariasTaxasInfo"></div></div><span class="item-arrow">▶</span></li>
             <li class="list-item" id="itemTabelaBairros"><div class="item-indicator">🏙️</div><div class="item-content"><div class="item-title">Tabela de Bairros</div><div class="item-desc"></div></div><span class="item-arrow">▶</span></li>
+            <li class="list-item admin-only" id="itemComandas" style="display:none;"><div class="item-indicator">📋</div><div class="item-content"><div class="item-title">Comandas</div><div class="item-desc" id="comandasCount"></div></div><span class="item-arrow">▶</span></li>
             <li class="list-item admin-only" id="itemCadastroEntregadores" style="display:none;"><div class="item-indicator">🧑‍💼</div><div class="item-content"><div class="item-title">Cadastro de Entregadores</div><div class="item-desc" id="entregadoresCount"></div></div><span class="item-arrow">▶</span></li>
         </ul>
     </div>
 
-    <!-- Modal Calendário -->
-    <div id="calendarModal" class="modal-overlay"><div class="modal-box"><div class="modal-header"><span class="modal-title">📅 DIAS RODADOS</span><button class="modal-close" id="closeCalendarModal">✕</button></div><div class="calendar-nav"><button id="prevMonth">◀</button><span class="calendar-month-year" id="monthYearDisplay"></span><button id="nextMonth">▶</button></div><div class="calendar-grid" id="calendarDaysGrid"></div><div class="calendar-info" id="calendarInfo" style="margin-top:12px; color:rgba(180,200,220,0.7);">Selecione os dias</div></div></div>
-
-    <!-- Modal Diárias e Taxas -->
-    <div id="taxesModal" class="modal-overlay"><div class="modal-box"><div class="modal-header"><span class="modal-title">💲 DIÁRIAS E TAXAS</span><button class="modal-close" id="closeTaxesModal">✕</button></div><div style="display:flex;flex-direction:column;gap:16px;"><div class="tax-field"><label>🏨 DIÁRIAS</label><input type="number" id="diariasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01"></div><div class="tax-field"><label>📋 TAXAS</label><input type="number" id="taxasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01"></div><div class="tax-field"><label>🔻 DESCONTOS</label><input type="number" id="descontosInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01"></div><button id="saveTaxesBtn" class="login-btn">💾 SALVAR</button><div id="taxesInfo" style="font-family:'Share Tech Mono';font-size:0.75rem;color:rgba(180,200,220,0.7);text-align:center;"></div></div></div></div>
-
-    <!-- Modal Tabela de Bairros (com importação apenas de nome e diária) -->
+    <!-- Modal Tabela de Bairros (ordenada por taxa) -->
     <div id="bairrosModal" class="modal-overlay">
         <div class="modal-box" style="max-width:600px;">
             <div class="modal-header"><span class="modal-title">🏙️ TABELA DE BAIRROS</span><button class="modal-close" id="closeBairrosModal">✕</button></div>
-            <!-- Tabela de bairros -->
             <div style="margin-bottom:15px;">
                 <table class="bairros-table" id="bairrosTable">
-                    <thead><tr><th>Bairro</th><th>Diária (R$)</th><th>Taxa (R$)</th><th></th></tr></thead>
+                    <thead><tr><th>Bairro</th><th>Taxa (R$)</th><th id="thAcoes"></th></tr></thead>
                     <tbody></tbody>
                 </table>
-                <div style="font-family:'Share Tech Mono'; font-size:0.7rem; color:rgba(180,200,220,0.5); margin-top:5px;">
-                    Total de bairros: <span id="bairrosCount">0</span>
-                </div>
+                <div style="font-family:'Share Tech Mono'; font-size:0.7rem; color:rgba(180,200,220,0.5); margin-top:5px;">Total de bairros: <span id="bairrosCount">0</span></div>
             </div>
-            <!-- Seção de importação por texto (apenas nome;valor) -->
-            <div style="border-top:1px solid rgba(0,168,89,0.3); padding-top:15px; margin-bottom:15px;">
-                <div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);margin-bottom:8px;">📋 COLE A LISTA (Nome;Valor)</div>
-                <textarea id="importBairrosText" class="futuristic-input" placeholder="Ex:&#10;Centro;150.00&#10;Jardim Europa;200.00" style="height:100px;"></textarea>
+            <div id="adminImportSection" class="admin-section" style="border-top:1px solid rgba(0,168,89,0.3); padding-top:15px; margin-bottom:15px;">
+                <div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);margin-bottom:8px;">📋 COLE SUA LISTA (Bairro + Taxa)</div>
+                <textarea id="importBairrosText" class="futuristic-input" placeholder="Ex:&#10;pituba R$13&#10;barra R$18,50&#10;centro;200.00"></textarea>
                 <button id="importBairrosBtn" class="login-btn" style="margin-top:8px;">⬇️ IMPORTAR BAIRROS</button>
                 <div id="importMsg" style="font-family:'Share Tech Mono';font-size:0.7rem;color:rgba(180,200,220,0.7);text-align:center;min-height:20px;margin-top:5px;"></div>
             </div>
-            <!-- Adicionar um único bairro -->
-            <div style="border-top:1px solid rgba(0,168,89,0.3); padding-top:15px;">
+            <div id="adminAddSection" class="admin-section" style="border-top:1px solid rgba(0,168,89,0.3); padding-top:15px;">
                 <div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);margin-bottom:12px;">➕ ADICIONAR UM BAIRRO</div>
                 <div class="input-group"><label>NOME</label><input type="text" id="novoBairroNome" class="futuristic-input" placeholder="Nome do bairro"></div>
-                <div class="input-group"><label>DIÁRIA (R$)</label><input type="number" id="novoBairroDiaria" class="futuristic-input" placeholder="0.00" step="0.01"></div>
                 <div class="input-group"><label>TAXA (R$)</label><input type="number" id="novoBairroTaxa" class="futuristic-input" placeholder="0.00" step="0.01"></div>
                 <button type="button" id="addBairroBtn" class="login-btn" style="margin-top:6px;">💾 ADICIONAR</button>
                 <div id="bairroMsg" style="font-family:'Share Tech Mono';font-size:0.75rem;color:rgba(180,200,220,0.7);text-align:center;min-height:20px;margin-top:8px;"></div>
+            </div>
+            <div id="adminClearSection" class="admin-section" style="border-top:1px solid rgba(206,43,55,0.4); padding-top:15px; margin-top:15px;">
+                <button type="button" id="clearAllBairrosBtn" class="login-btn danger-btn">🗑️ LIMPAR TODOS OS BAIRROS</button>
+                <div id="clearMsg" style="font-family:'Share Tech Mono';font-size:0.7rem;color:rgba(180,200,220,0.7);text-align:center;min-height:20px;margin-top:5px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-box confirm-box">
+            <div style="font-family:'Orbitron';color:var(--white);font-size:1rem;margin-bottom:20px;">⚠️ Tem certeza que deseja remover TODOS os bairros?</div>
+            <div class="confirm-buttons">
+                <button class="confirm-btn yes" id="confirmYes">SIM, LIMPAR</button>
+                <button class="confirm-btn no" id="confirmNo">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Comandas (admin only) -->
+    <div id="comandasModal" class="modal-overlay">
+        <div class="modal-box" style="max-width:600px;">
+            <div class="modal-header"><span class="modal-title">📋 COMANDAS</span><button class="modal-close" id="closeComandasModal">✕</button></div>
+            <div style="margin-bottom:15px;">
+                <textarea id="comandasText" class="futuristic-input" placeholder="Cole aqui o conteúdo do arquivo TXT (uma linha por comanda)"></textarea>
+                <button id="importComandasBtn" class="login-btn" style="margin-top:8px;">⬇️ IMPORTAR COMANDAS</button>
+                <div id="comandasMsg" style="font-family:'Share Tech Mono';font-size:0.7rem;color:rgba(180,200,220,0.7);text-align:center;min-height:20px;margin-top:5px;"></div>
+            </div>
+            <div style="border-top:1px solid rgba(0,168,89,0.3); padding-top:15px;">
+                <div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);margin-bottom:8px;">📌 COMANDAS IMPORTADAS</div>
+                <div id="comandasLista" class="comandas-list" style="max-height:250px; overflow-y:auto;"></div>
+                <button id="clearComandasBtn" class="login-btn danger-btn" style="margin-top:10px;">🗑️ LIMPAR COMANDAS</button>
             </div>
         </div>
     </div>
@@ -194,7 +229,7 @@
                 <div class="input-group"><label>👤 NOME COMPLETO</label><input type="text" id="entregadorNome" class="futuristic-input" placeholder="Nome do entregador"></div>
                 <div class="input-group"><label>🔑 SENHA DE ACESSO</label><input type="password" id="entregadorSenha" class="futuristic-input" placeholder="Digite a senha"></div>
                 <div class="input-group"><label>🔁 CONFIRMAR SENHA</label><input type="password" id="entregadorConfirmaSenha" class="futuristic-input" placeholder="Repita a senha"></div>
-                <button type="button" id="addEntregadorBtn" class="login-btn" style="margin-top:6px;" onclick="realizarCadastroEntregador()">➕ CADASTRAR E ACESSAR</button>
+                <button type="button" id="addEntregadorBtn" class="login-btn" style="margin-top:6px;">➕ CADASTRAR E ACESSAR</button>
                 <div id="entregadorMsg" style="font-family:'Share Tech Mono';font-size:0.75rem;color:rgba(180,200,220,0.7);text-align:center;min-height:20px;"></div>
                 <div style="margin-top:10px;"><div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);letter-spacing:2px;margin-bottom:10px;">ENTREGADORES CADASTRADOS</div><div id="entregadoresLista" style="max-height:200px;overflow-y:auto;"></div></div>
             </div>
@@ -202,171 +237,183 @@
     </div>
 
     <script>
-        // ========== GERENCIAMENTO DE BAIRROS ==========
-        function getBairros() {
-            const data = localStorage.getItem('bairros');
-            return data ? JSON.parse(data) : [
-                { nome: "Centro", diaria: 150.00, taxa: 12.00 },
-                { nome: "Jardim Europa", diaria: 200.00, taxa: 18.00 },
-                { nome: "Vila Mariana", diaria: 180.00, taxa: 15.00 },
-                { nome: "Bela Vista", diaria: 170.00, taxa: 14.00 },
-                { nome: "Moema", diaria: 220.00, taxa: 20.00 },
-                { nome: "Itaim Bibi", diaria: 250.00, taxa: 22.00 }
-            ];
-        }
-        function saveBairros(bairros) {
-            localStorage.setItem('bairros', JSON.stringify(bairros));
-        }
+        // ========== DADOS EM MEMÓRIA ==========
+        let bairrosData = [
+            { nome: "Centro", taxa: 12.00 },
+            { nome: "Jardim Europa", taxa: 18.00 },
+            { nome: "Vila Mariana", taxa: 15.00 },
+            { nome: "Bela Vista", taxa: 14.00 },
+            { nome: "Moema", taxa: 20.00 },
+            { nome: "Itaim Bibi", taxa: 22.00 }
+        ];
+        let entregadoresData = [];
+        let comandasData = []; // array de strings
+
+        function getBairros() { return bairrosData; }
+        function saveBairros(arr) { bairrosData = arr; }
+        function getEntregadores() { return entregadoresData; }
+        function saveEntregadores(arr) { entregadoresData = arr; }
+        function getComandas() { return comandasData; }
+        function saveComandas(arr) { comandasData = arr; }
+
+        // ========== ORDENAÇÃO E RENDERIZAÇÃO DE BAIRROS ==========
+        function ordenarBairros() { bairrosData.sort((a, b) => a.taxa - b.taxa); }
         function renderBairrosTable() {
+            ordenarBairros();
             const bairros = getBairros();
             const tbody = document.querySelector('#bairrosTable tbody');
+            const isAdmin = loggedUser && loggedUser.isAdmin;
+            document.getElementById('thAcoes').style.display = isAdmin ? 'table-cell' : 'none';
             tbody.innerHTML = bairros.map((b, index) => `
                 <tr>
                     <td>${b.nome}</td>
-                    <td>${b.diaria.toFixed(2)}</td>
                     <td>${b.taxa.toFixed(2)}</td>
-                    <td><button class="remove-bairro" data-index="${index}">🗑️</button></td>
+                    ${isAdmin ? `<td><button class="remove-bairro" data-index="${index}">🗑️</button></td>` : ''}
                 </tr>
             `).join('');
             document.getElementById('bairrosCount').textContent = bairros.length;
-            document.querySelectorAll('.remove-bairro').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const index = parseInt(e.target.getAttribute('data-index'));
-                    const bairrosAtuais = getBairros();
-                    bairrosAtuais.splice(index, 1);
-                    saveBairros(bairrosAtuais);
-                    renderBairrosTable();
+            if (isAdmin) {
+                document.querySelectorAll('.remove-bairro').forEach(btn => {
+                    btn.onclick = (e) => {
+                        const index = parseInt(e.target.getAttribute('data-index'));
+                        const bairrosAtuais = getBairros();
+                        bairrosAtuais.splice(index, 1);
+                        saveBairros(bairrosAtuais);
+                        renderBairrosTable();
+                    };
                 });
-            });
+            }
+            document.getElementById('adminImportSection').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('adminAddSection').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('adminClearSection').style.display = isAdmin ? 'block' : 'none';
+        }
+
+        function parseLinhaBairro(linha) {
+            linha = linha.trim();
+            if (!linha) return null;
+            let parts = linha.split(';');
+            if (parts.length >= 2) {
+                const nome = parts[0].trim();
+                const valorStr = parts[1].trim().replace('R$', '').replace(/\./g, '').replace(',', '.');
+                const valor = parseFloat(valorStr);
+                if (nome && !isNaN(valor) && valor >= 0) return { nome, taxa: valor };
+            }
+            const match = linha.match(/^(.+?)\s+R?\$?\s*([\d,.]+)\s*$/);
+            if (match) {
+                const nome = match[1].trim();
+                const valorStr = match[2].replace('R$', '').replace(/\./g, '').replace(',', '.');
+                const valor = parseFloat(valorStr);
+                if (nome && !isNaN(valor) && valor >= 0) return { nome, taxa: valor };
+            }
+            const tokens = linha.split(/\s+/);
+            if (tokens.length >= 2) {
+                const ultimo = tokens[tokens.length-1].replace('R$', '').replace(',', '.');
+                const valor = parseFloat(ultimo);
+                if (!isNaN(valor) && valor >= 0) {
+                    const nome = tokens.slice(0, -1).join(' ');
+                    return { nome, taxa: valor };
+                }
+            }
+            return null;
         }
 
         function importarBairros() {
+            if (!loggedUser || !loggedUser.isAdmin) return;
             const text = document.getElementById('importBairrosText').value.trim();
             const msg = document.getElementById('importMsg');
-            if (!text) {
-                msg.textContent = '⚠️ Cole uma lista no formato Nome;Valor';
-                msg.style.color = '#ce2b37';
-                return;
-            }
+            if (!text) { msg.textContent = '⚠️ Cole sua lista de bairros.'; msg.style.color = '#ce2b37'; return; }
             const lines = text.split('\n').filter(line => line.trim() !== '');
             const bairrosExistentes = getBairros();
-            let novos = 0;
-            let erros = 0;
+            let novos = 0, erros = 0;
             const novosBairros = [];
-
             for (let line of lines) {
-                const parts = line.split(';');
-                if (parts.length < 2) {
-                    erros++;
-                    continue;
-                }
-                const nome = parts[0].trim();
-                const diaria = parseFloat(parts[1].replace(',', '.'));
-                if (!nome || isNaN(diaria) || diaria < 0) {
-                    erros++;
-                    continue;
-                }
-                // Verifica duplicidade
-                if (bairrosExistentes.some(b => b.nome.toLowerCase() === nome.toLowerCase())) {
-                    erros++;
-                    continue;
-                }
-                novosBairros.push({ nome, diaria, taxa: 0.00 });
+                const parsed = parseLinhaBairro(line);
+                if (!parsed) { erros++; continue; }
+                if (bairrosExistentes.some(b => b.nome.toLowerCase() === parsed.nome.toLowerCase())) { erros++; continue; }
+                novosBairros.push(parsed);
                 novos++;
             }
-
             if (novos > 0) {
-                const updatedBairros = [...bairrosExistentes, ...novosBairros];
-                saveBairros(updatedBairros);
+                const atualizados = [...bairrosExistentes, ...novosBairros];
+                saveBairros(atualizados);
                 renderBairrosTable();
-                msg.textContent = `✅ ${novos} bairro(s) importado(s) com sucesso!`;
+                msg.textContent = `✅ ${novos} bairro(s) importado(s)!`;
                 msg.style.color = '#00a859';
                 document.getElementById('importBairrosText').value = '';
             } else {
-                msg.textContent = `⚠️ Nenhum bairro novo foi adicionado (${erros} linha(s) com erro ou duplicada(s)).`;
+                msg.textContent = `⚠️ Nenhum bairro novo (${erros} erros/duplicados).`;
                 msg.style.color = '#ce2b37';
             }
             setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 4000);
         }
 
         function adicionarBairro() {
+            if (!loggedUser || !loggedUser.isAdmin) return;
             const nome = document.getElementById('novoBairroNome').value.trim();
-            const diaria = parseFloat(document.getElementById('novoBairroDiaria').value);
             const taxa = parseFloat(document.getElementById('novoBairroTaxa').value);
             const msg = document.getElementById('bairroMsg');
-            if (!nome || isNaN(diaria) || isNaN(taxa)) {
-                msg.textContent = '⚠️ Preencha todos os campos corretamente.';
-                msg.style.color = '#ce2b37';
-                return;
-            }
-            if (diaria < 0 || taxa < 0) {
-                msg.textContent = '⚠️ Valores não podem ser negativos.';
-                msg.style.color = '#ce2b37';
-                return;
-            }
+            if (!nome || isNaN(taxa)) { msg.textContent = '⚠️ Preencha todos os campos.'; msg.style.color = '#ce2b37'; return; }
+            if (taxa < 0) { msg.textContent = '⚠️ Valor não pode ser negativo.'; msg.style.color = '#ce2b37'; return; }
             const bairros = getBairros();
-            if (bairros.some(b => b.nome.toLowerCase() === nome.toLowerCase())) {
-                msg.textContent = '⚠️ Bairro já existe.';
-                msg.style.color = '#ce2b37';
-                return;
-            }
-            bairros.push({ nome, diaria, taxa });
+            if (bairros.some(b => b.nome.toLowerCase() === nome.toLowerCase())) { msg.textContent = '⚠️ Bairro já existe.'; msg.style.color = '#ce2b37'; return; }
+            bairros.push({ nome, taxa });
             saveBairros(bairros);
             renderBairrosTable();
             document.getElementById('novoBairroNome').value = '';
-            document.getElementById('novoBairroDiaria').value = '';
             document.getElementById('novoBairroTaxa').value = '';
-            msg.textContent = '✅ Bairro adicionado com sucesso!';
+            msg.textContent = '✅ Bairro adicionado!'; msg.style.color = '#00a859';
+            setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
+        }
+
+        function abrirConfirmClear() { document.getElementById('confirmModal').classList.add('active'); }
+        function fecharConfirmClear() { document.getElementById('confirmModal').classList.remove('active'); }
+        function executarLimpeza() {
+            saveBairros([]);
+            renderBairrosTable();
+            fecharConfirmClear();
+            document.getElementById('clearMsg').textContent = '✅ Todos os bairros foram removidos.';
+            document.getElementById('clearMsg').style.color = '#00a859';
+            setTimeout(() => { document.getElementById('clearMsg').textContent = ''; }, 3000);
+        }
+
+        // ========== COMANDAS ==========
+        function renderComandas() {
+            const lista = document.getElementById('comandasLista');
+            const comandas = getComandas();
+            lista.innerHTML = comandas.length === 0 ? '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhuma comanda importada</div>' : comandas.map(c => `<div class="comanda-item">📄 ${c}</div>`).join('');
+            document.getElementById('comandasCount').textContent = comandas.length ? `${comandas.length} comanda(s)` : '';
+        }
+
+        function importarComandas() {
+            if (!loggedUser || !loggedUser.isAdmin) return;
+            const text = document.getElementById('comandasText').value.trim();
+            const msg = document.getElementById('comandasMsg');
+            if (!text) { msg.textContent = '⚠️ Cole o conteúdo do arquivo.'; msg.style.color = '#ce2b37'; return; }
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) { msg.textContent = '⚠️ Nenhuma linha encontrada.'; msg.style.color = '#ce2b37'; return; }
+            const atuais = getComandas();
+            const novas = [...atuais, ...lines];
+            saveComandas(novas);
+            renderComandas();
+            document.getElementById('comandasText').value = '';
+            msg.textContent = `✅ ${lines.length} comanda(s) importada(s)!`;
             msg.style.color = '#00a859';
             setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
         }
 
-        // ========== RESTANTE DO CÓDIGO ==========
-        const loadingScreen = document.getElementById('loadingScreen');
-        const loginScreen = document.getElementById('loginScreen');
-        const mainContent = document.getElementById('mainContent');
-        const loaderBar = document.getElementById('loaderBar');
-        const loadingPercent = document.getElementById('loadingPercent');
-        const usernameInput = document.getElementById('usernameInput');
-        const passwordInput = document.getElementById('passwordInput');
-        const loginBtn = document.getElementById('loginBtn');
-        const loginError = document.getElementById('loginError');
-        const loggedUserDisplay = document.getElementById('loggedUserDisplay');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const calendarModal = document.getElementById('calendarModal');
-        const taxesModal = document.getElementById('taxesModal');
-        const bairrosModal = document.getElementById('bairrosModal');
-        const entregadoresModal = document.getElementById('entregadoresModal');
-        const itemCadastroEntregadores = document.getElementById('itemCadastroEntregadores');
-        const diasRodadosInfo = document.getElementById('diasRodadosInfo');
-        const diariasTaxasInfo = document.getElementById('diariasTaxasInfo');
-        const entregadoresCount = document.getElementById('entregadoresCount');
-        const monthYearDisplay = document.getElementById('monthYearDisplay');
-        const calendarDaysGrid = document.getElementById('calendarDaysGrid');
-        const calendarInfo = document.getElementById('calendarInfo');
-        const prevMonthBtn = document.getElementById('prevMonth');
-        const nextMonthBtn = document.getElementById('nextMonth');
-        const diariasInput = document.getElementById('diariasInput');
-        const taxasInput = document.getElementById('taxasInput');
-        const descontosInput = document.getElementById('descontosInput');
-        const saveTaxesBtn = document.getElementById('saveTaxesBtn');
-        const taxesInfo = document.getElementById('taxesInfo');
-        const entregadorNome = document.getElementById('entregadorNome');
-        const entregadorSenha = document.getElementById('entregadorSenha');
-        const entregadorConfirmaSenha = document.getElementById('entregadorConfirmaSenha');
-        const addEntregadorBtn = document.getElementById('addEntregadorBtn');
-        const entregadorMsg = document.getElementById('entregadorMsg');
-        const entregadoresLista = document.getElementById('entregadoresLista');
+        function limparComandas() {
+            saveComandas([]);
+            renderComandas();
+            document.getElementById('comandasMsg').textContent = '🗑️ Comandas limpas.';
+            document.getElementById('comandasMsg').style.color = '#ce2b37';
+            setTimeout(() => { document.getElementById('comandasMsg').textContent = ''; }, 2000);
+        }
 
-        const ADMIN_USER = "admin", ADMIN_PASS = "123";
-        let currentDate = new Date(), selectedDays = new Set(), loggedUser = null;
-
-        function getEntregadores() { return JSON.parse(localStorage.getItem('entregadores') || '[]'); }
-        function saveEntregadores(arr) { localStorage.setItem('entregadores', JSON.stringify(arr)); }
+        // ========== ENTREGADORES ==========
         function addEntregador(nome, senha) {
             const entregadores = getEntregadores();
             if (entregadores.find(e => e.nome.toLowerCase() === nome.toLowerCase())) return { success: false, message: '⚠️ Entregador já cadastrado!' };
-            if (nome.toLowerCase() === ADMIN_USER) return { success: false, message: '⚠️ Nome reservado!' };
+            if (nome.toLowerCase() === 'admin') return { success: false, message: '⚠️ Nome reservado!' };
             entregadores.push({ nome, senha });
             saveEntregadores(entregadores);
             return { success: true, message: '✅ Entregador cadastrado!' };
@@ -374,115 +421,141 @@
         function removeEntregador(nome) { saveEntregadores(getEntregadores().filter(e => e.nome !== nome)); }
         function renderEntregadoresLista() {
             const arr = getEntregadores();
-            entregadoresLista.innerHTML = arr.length === 0 ? '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhum entregador</div>' : arr.map(e => `<div class="entregador-item"><span>🧑 ${e.nome}</span><button class="remove-entregador" data-nome="${e.nome}">🗑️ REMOVER</button></div>`).join('');
+            document.getElementById('entregadoresLista').innerHTML = arr.length === 0 ? '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhum entregador</div>' : arr.map(e => `<div class="entregador-item"><span>🧑 ${e.nome}</span><button class="remove-entregador" data-nome="${e.nome}">🗑️ REMOVER</button></div>`).join('');
             document.querySelectorAll('.remove-entregador').forEach(b => b.addEventListener('click', (ev) => {
                 removeEntregador(ev.target.dataset.nome);
                 renderEntregadoresLista();
-                updateEntregadoresCount();
+                document.getElementById('entregadoresCount').textContent = getEntregadores().length ? `${getEntregadores().length} entregador(es)` : '';
             }));
-            updateEntregadoresCount();
+            document.getElementById('entregadoresCount').textContent = arr.length ? `${arr.length} entregador(es)` : '';
         }
-        function updateEntregadoresCount() { entregadoresCount.textContent = getEntregadores().length ? `${getEntregadores().length} entregador(es)` : ''; }
-
-        window.realizarCadastroEntregador = function() {
-            const nome = entregadorNome.value.trim();
-            const senha = entregadorSenha.value;
-            const confirma = entregadorConfirmaSenha.value;
-            if (!nome || !senha || !confirma) { entregadorMsg.textContent = '⚠️ Preencha todos os campos'; entregadorMsg.style.color = '#ce2b37'; return; }
-            if (senha !== confirma) { entregadorMsg.textContent = '⚠️ Senhas não conferem'; entregadorMsg.style.color = '#ce2b37'; return; }
+        function realizarCadastroEntregador() {
+            const nome = document.getElementById('entregadorNome').value.trim();
+            const senha = document.getElementById('entregadorSenha').value;
+            const confirma = document.getElementById('entregadorConfirmaSenha').value;
+            const msg = document.getElementById('entregadorMsg');
+            if (!nome || !senha || !confirma) { msg.textContent = '⚠️ Preencha todos os campos'; msg.style.color = '#ce2b37'; return; }
+            if (senha !== confirma) { msg.textContent = '⚠️ Senhas não conferem'; msg.style.color = '#ce2b37'; return; }
             const result = addEntregador(nome, senha);
-            entregadorMsg.textContent = result.message;
-            entregadorMsg.style.color = result.success ? '#00a859' : '#ce2b37';
+            msg.textContent = result.message;
+            msg.style.color = result.success ? '#00a859' : '#ce2b37';
             if (result.success) {
-                entregadoresModal.classList.remove('active');
+                document.getElementById('entregadoresModal').classList.remove('active');
                 loggedUser = { username: nome, isAdmin: false };
                 entrarNoSistema();
-                entregadorNome.value = ''; entregadorSenha.value = ''; entregadorConfirmaSenha.value = '';
+                document.getElementById('entregadorNome').value = '';
+                document.getElementById('entregadorSenha').value = '';
+                document.getElementById('entregadorConfirmaSenha').value = '';
             }
-            setTimeout(() => { entregadorMsg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
-        };
+            setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
+        }
+
+        // ========== LOGIN ==========
+        const ADMIN_USER = "admin", ADMIN_PASS = "123";
+        let loggedUser = null;
 
         function attemptLogin() {
-            const u = usernameInput.value.trim(), p = passwordInput.value.trim();
-            if (!u || !p) { loginError.textContent = '⚠️ Preencha todos os campos'; return; }
+            const u = document.getElementById('usernameInput').value.trim();
+            const p = document.getElementById('passwordInput').value.trim();
+            if (!u || !p) { document.getElementById('loginError').textContent = '⚠️ Preencha todos os campos'; return; }
             if (u === ADMIN_USER && p === ADMIN_PASS) { loggedUser = { username: ADMIN_USER, isAdmin: true }; entrarNoSistema(); return; }
             const ent = getEntregadores().find(e => e.nome.toLowerCase() === u.toLowerCase() && e.senha === p);
             if (ent) { loggedUser = { username: ent.nome, isAdmin: false }; entrarNoSistema(); return; }
-            loginError.textContent = '⚠️ ACESSO NEGADO'; passwordInput.value = ''; passwordInput.focus();
+            document.getElementById('loginError').textContent = '⚠️ ACESSO NEGADO';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordInput').focus();
         }
         function entrarNoSistema() {
-            loginScreen.classList.add('hidden');
-            mainContent.classList.add('visible');
-            loggedUserDisplay.textContent = loggedUser.username;
-            itemCadastroEntregadores.style.display = loggedUser.isAdmin ? 'flex' : 'none';
-            if (loggedUser.isAdmin) updateEntregadoresCount();
-            usernameInput.value = ''; passwordInput.value = '';
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainContent').classList.add('visible');
+            document.getElementById('loggedUserDisplay').textContent = loggedUser.username;
+            const isAdmin = loggedUser.isAdmin;
+            document.getElementById('itemCadastroEntregadores').style.display = isAdmin ? 'flex' : 'none';
+            document.getElementById('itemComandas').style.display = isAdmin ? 'flex' : 'none';
+            if (isAdmin) {
+                document.getElementById('entregadoresCount').textContent = getEntregadores().length ? `${getEntregadores().length} entregador(es)` : '';
+                document.getElementById('comandasCount').textContent = getComandas().length ? `${getComandas().length} comanda(s)` : '';
+            }
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('passwordInput').value = '';
         }
-        function logout() { loggedUser = null; mainContent.classList.remove('visible'); loginScreen.classList.remove('hidden'); usernameInput.focus(); }
+        function logout() {
+            loggedUser = null;
+            document.getElementById('mainContent').classList.remove('visible');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('usernameInput').focus();
+        }
 
-        loginBtn.addEventListener('click', attemptLogin);
-        passwordInput.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
-        usernameInput.addEventListener('keydown', e => { if (e.key === 'Enter') passwordInput.focus(); });
-        logoutBtn.addEventListener('click', logout);
+        // ========== EVENTOS ==========
+        document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+        document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+        document.getElementById('usernameInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordInput').focus(); });
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.getElementById('clearAllBairrosBtn').addEventListener('click', abrirConfirmClear);
+        document.getElementById('confirmYes').addEventListener('click', executarLimpeza);
+        document.getElementById('confirmNo').addEventListener('click', fecharConfirmClear);
+        document.getElementById('confirmModal').addEventListener('click', e => { if (e.target === document.getElementById('confirmModal')) fecharConfirmClear(); });
 
+        // Tabela de Bairros
+        document.getElementById('itemTabelaBairros').addEventListener('click', () => {
+            document.getElementById('bairrosModal').classList.add('active');
+            renderBairrosTable();
+        });
+        document.getElementById('addBairroBtn').addEventListener('click', adicionarBairro);
+        document.getElementById('importBairrosBtn').addEventListener('click', importarBairros);
+
+        // Comandas
+        document.getElementById('itemComandas').addEventListener('click', () => {
+            document.getElementById('comandasModal').classList.add('active');
+            renderComandas();
+        });
+        document.getElementById('importComandasBtn').addEventListener('click', importarComandas);
+        document.getElementById('clearComandasBtn').addEventListener('click', limparComandas);
+
+        // Entregadores
+        document.getElementById('itemCadastroEntregadores').addEventListener('click', () => {
+            document.getElementById('entregadoresModal').classList.add('active');
+            renderEntregadoresLista();
+            document.getElementById('entregadorNome').focus();
+        });
+        document.getElementById('addEntregadorBtn').addEventListener('click', realizarCadastroEntregador);
+
+        // Fechamentos genéricos
+        document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', () => {
+            btn.closest('.modal-overlay').classList.remove('active');
+        }));
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
+        });
+
+        // Teclas Enter nos formulários
+        document.getElementById('novoBairroNome').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('novoBairroTaxa').focus(); });
+        document.getElementById('novoBairroTaxa').addEventListener('keydown', e => { if (e.key === 'Enter') adicionarBairro(); });
+        document.getElementById('entregadorNome').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('entregadorSenha').focus(); } });
+        document.getElementById('entregadorSenha').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('entregadorConfirmaSenha').focus(); } });
+        document.getElementById('entregadorConfirmaSenha').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); realizarCadastroEntregador(); } });
+
+        // Loading
         let progress = 0;
         const loadingInterval = setInterval(() => {
             progress += Math.floor(Math.random()*8)+2;
-            if (progress >= 100) { progress = 100; clearInterval(loadingInterval); loaderBar.style.width = '100%'; loadingPercent.textContent = '100%'; setTimeout(() => { loadingScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); usernameInput.focus(); }, 600); }
-            else { loaderBar.style.width = progress+'%'; loadingPercent.textContent = progress+'%'; }
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(loadingInterval);
+                document.getElementById('loaderBar').style.width = '100%';
+                document.getElementById('loadingPercent').textContent = '100%';
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                    document.getElementById('loginScreen').classList.remove('hidden');
+                    document.getElementById('usernameInput').focus();
+                }, 600);
+            } else {
+                document.getElementById('loaderBar').style.width = progress+'%';
+                document.getElementById('loadingPercent').textContent = progress+'%';
+            }
         }, 100);
 
-        document.getElementById('itemDiasRodados').addEventListener('click', () => { calendarModal.classList.add('active'); renderCalendar(); });
-        document.getElementById('itemDiariasTaxas').addEventListener('click', () => { taxesModal.classList.add('active'); diariasInput.focus(); });
-        document.getElementById('itemTabelaBairros').addEventListener('click', () => { bairrosModal.classList.add('active'); renderBairrosTable(); });
-        itemCadastroEntregadores.addEventListener('click', () => { entregadoresModal.classList.add('active'); renderEntregadoresLista(); entregadorNome.focus(); });
-        document.getElementById('closeCalendarModal').addEventListener('click', () => calendarModal.classList.remove('active'));
-        document.getElementById('closeTaxesModal').addEventListener('click', () => taxesModal.classList.remove('active'));
-        document.getElementById('closeBairrosModal').addEventListener('click', () => bairrosModal.classList.remove('active'));
-        document.getElementById('closeEntregadoresModal').addEventListener('click', () => entregadoresModal.classList.remove('active'));
-        calendarModal.addEventListener('click', e => { if (e.target === calendarModal) calendarModal.classList.remove('active'); });
-        taxesModal.addEventListener('click', e => { if (e.target === taxesModal) taxesModal.classList.remove('active'); });
-        bairrosModal.addEventListener('click', e => { if (e.target === bairrosModal) bairrosModal.classList.remove('active'); });
-        entregadoresModal.addEventListener('click', e => { if (e.target === entregadoresModal) entregadoresModal.classList.remove('active'); });
-
-        document.getElementById('addBairroBtn').addEventListener('click', adicionarBairro);
-        document.getElementById('importBairrosBtn').addEventListener('click', importarBairros);
-        document.getElementById('novoBairroNome').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('novoBairroDiaria').focus(); });
-        document.getElementById('novoBairroDiaria').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('novoBairroTaxa').focus(); });
-        document.getElementById('novoBairroTaxa').addEventListener('keydown', e => { if (e.key === 'Enter') adicionarBairro(); });
-
-        entregadorNome.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); entregadorSenha.focus(); } });
-        entregadorSenha.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); entregadorConfirmaSenha.focus(); } });
-        entregadorConfirmaSenha.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); window.realizarCadastroEntregador(); } });
-
-        function formatDateKey(y,m,d){ return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
-        function renderCalendar() {
-            const y = currentDate.getFullYear(), m = currentDate.getMonth();
-            monthYearDisplay.textContent = `${['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][m]} ${y}`;
-            calendarDaysGrid.innerHTML = '';
-            ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(d => { const h = document.createElement('div'); h.className = 'calendar-day-header'; h.textContent = d; calendarDaysGrid.appendChild(h); });
-            for (let i=0; i<new Date(y,m,1).getDay(); i++) { const empty = document.createElement('div'); empty.className = 'calendar-day empty'; calendarDaysGrid.appendChild(empty); }
-            for (let d=1; d<=new Date(y,m+1,0).getDate(); d++) {
-                const dayEl = document.createElement('div'); dayEl.className = 'calendar-day'; dayEl.textContent = d;
-                const key = formatDateKey(y,m,d); if (selectedDays.has(key)) dayEl.classList.add('selected');
-                dayEl.addEventListener('click', () => {
-                    if (selectedDays.has(key)) { selectedDays.delete(key); dayEl.classList.remove('selected'); }
-                    else { selectedDays.add(key); dayEl.classList.add('selected'); }
-                    diasRodadosInfo.textContent = selectedDays.size ? `${selectedDays.size} dias` : '';
-                    calendarInfo.textContent = `${selectedDays.size} dias selecionados`;
-                });
-                calendarDaysGrid.appendChild(dayEl);
-            }
-        }
-        prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); });
-        nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); });
-
-        saveTaxesBtn.addEventListener('click', () => {
-            const d = parseFloat(diariasInput.value)||0, t = parseFloat(taxasInput.value)||0, desc = parseFloat(descontosInput.value)||0;
-            diariasTaxasInfo.textContent = `Total: R$ ${(d+t-desc).toFixed(2)}`;
-            taxesInfo.textContent = `✅ Salvo: Diárias ${d.toFixed(2)} + Taxas ${t.toFixed(2)} - Desc. ${desc.toFixed(2)}`;
-        });
-
+        // Partículas
         const canvas = document.getElementById('particlesCanvas'), ctx = canvas.getContext('2d');
         let particles = [];
         function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
