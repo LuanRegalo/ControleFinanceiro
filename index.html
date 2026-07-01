@@ -12,18 +12,8 @@
             --red: #ce2b37;
             --dark-bg: #0a0a0f;
             --card-bg: rgba(14, 14, 26, 0.85);
-            --glow-green: 0 0 10px rgba(0, 168, 89, 0.6), 0 0 30px rgba(0, 168, 89, 0.3), 0 0 60px rgba(0, 168, 89, 0.15);
-            --glow-red: 0 0 10px rgba(206, 43, 55, 0.6), 0 0 30px rgba(206, 43, 55, 0.3), 0 0 60px rgba(206, 43, 55, 0.15);
-            --border-glow: 0 0 2px var(--green), 0 0 8px rgba(0, 168, 89, 0.4), inset 0 0 2px rgba(0, 168, 89, 0.2);
-            --text-glow: 0 0 5px rgba(244, 245, 240, 0.8), 0 0 15px rgba(0, 168, 89, 0.4);
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: var(--dark-bg);
             font-family: 'Share Tech Mono', 'Orbitron', monospace;
@@ -32,1038 +22,152 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            cursor: default;
-            user-select: none;
-            -webkit-user-select: none;
             position: relative;
         }
-
-        /* Fundo com grid animada */
         .grid-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            background-image:
-                linear-gradient(rgba(0, 168, 89, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 168, 89, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridScroll 8s linear infinite;
-            mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 65%);
-            -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 65%);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
+            background-image: linear-gradient(rgba(0,168,89,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,168,89,0.05) 1px, transparent 1px);
+            background-size: 50px 50px; animation: gridScroll 8s linear infinite;
         }
-
-        @keyframes gridScroll {
-            0% {
-                transform: translate(0, 0);
-            }
-            100% {
-                transform: translate(50px, 50px);
-            }
-        }
-
-        /* Linhas horizontais de scan */
+        @keyframes gridScroll { 0% { transform: translate(0,0); } 100% { transform: translate(50px,50px); } }
         .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            background: repeating-linear-gradient(0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0, 0, 0, 0.15) 2px,
-                    rgba(0, 0, 0, 0.15) 4px);
-            opacity: 0.5;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px); opacity: 0.5;
         }
-
-        /* Partículas canvas */
-        #particlesCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* ========== TELAS OVERLAY ========== */
+        #particlesCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
         .overlay-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            background: rgba(10, 10, 15, 0.75);
-            transition: opacity 0.5s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px); background: rgba(10,10,15,0.75); transition: opacity 0.5s;
         }
-
-        .overlay-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
-        }
-
+        .overlay-screen.hidden { opacity: 0; pointer-events: none; }
         .overlay-box {
-            background: var(--card-bg);
-            border: 1.5px solid rgba(0, 168, 89, 0.25);
-            border-radius: 20px;
-            padding: 40px 30px;
-            width: 90%;
-            max-width: 420px;
-            box-shadow: 0 0 30px rgba(0, 168, 89, 0.08), 0 0 80px rgba(206, 43, 55, 0.06), 0 20px 60px rgba(0, 0, 0, 0.6);
-            text-align: center;
-            animation: containerPulse 4s ease-in-out infinite;
-            position: relative;
+            background: var(--card-bg); border: 1.5px solid rgba(0,168,89,0.25); border-radius: 20px;
+            padding: 40px 30px; width: 90%; max-width: 420px; text-align: center;
+            box-shadow: 0 0 30px rgba(0,168,89,0.08); position: relative;
         }
-
-        .overlay-box::before {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: -1px;
-            right: -1px;
-            bottom: -1px;
-            border-radius: 20px;
-            padding: 1.5px;
-            background: linear-gradient(135deg, var(--green) 0%, transparent 25%, transparent 75%, var(--red) 100%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
-            z-index: -1;
-            animation: borderGlow 6s linear infinite;
-        }
-
-        @keyframes borderGlow {
-            0%,
-            100% {
-                background: linear-gradient(135deg, var(--green) 0%, transparent 25%, transparent 75%, var(--red) 100%);
-            }
-            50% {
-                background: linear-gradient(135deg, var(--red) 0%, transparent 25%, transparent 75%, var(--green) 100%);
-            }
-        }
-
-        /* Tela de carregamento */
-        .loading-text {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: 3px;
-            color: var(--white);
-            text-shadow: 0 0 10px var(--green);
-            margin-bottom: 30px;
-        }
-
-        .loader-bar-bg {
-            width: 100%;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 25px 0;
-            border: 1px solid rgba(0, 168, 89, 0.3);
-        }
-
-        .loader-bar-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--green), var(--white), var(--red));
-            border-radius: 10px;
-            box-shadow: 0 0 20px var(--green);
-            transition: width 0.3s ease;
-        }
-
-        .loading-sub {
-            font-family: 'Share Tech Mono', monospace;
-            color: rgba(180, 200, 220, 0.7);
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-        }
-
-        /* Tela de login */
-        .login-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 700;
-            letter-spacing: 3px;
-            color: var(--white);
-            text-shadow: 0 0 10px var(--green);
-            margin-bottom: 25px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            color: var(--green);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-        }
-
+        .loading-text { font-family: 'Orbitron'; font-size: 1.5rem; color: var(--white); text-shadow: 0 0 10px var(--green); margin-bottom: 30px; }
+        .loader-bar-bg { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin: 25px 0; }
+        .loader-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--green), var(--white), var(--red)); border-radius: 10px; transition: width 0.3s; }
+        .loading-sub { font-family: 'Share Tech Mono'; color: rgba(180,200,220,0.7); font-size: 0.8rem; letter-spacing: 2px; }
+        .login-title { font-family: 'Orbitron'; font-size: 1.4rem; color: var(--white); text-shadow: 0 0 10px var(--green); margin-bottom: 25px; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-family: 'Share Tech Mono'; font-size: 0.7rem; color: var(--green); letter-spacing: 2px; margin-bottom: 6px; }
         .futuristic-input {
-            width: 100%;
-            padding: 12px 15px;
-            background: rgba(20, 20, 35, 0.7);
-            border: 1px solid rgba(0, 168, 89, 0.3);
-            border-radius: 8px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 1rem;
-            color: var(--white);
-            outline: none;
-            transition: all 0.3s ease;
-            letter-spacing: 1px;
+            width: 100%; padding: 12px 15px; background: rgba(20,20,35,0.7); border: 1px solid rgba(0,168,89,0.3);
+            border-radius: 8px; font-family: 'Share Tech Mono'; font-size: 1rem; color: var(--white); outline: none;
         }
-
-        .futuristic-input:focus {
-            border-color: var(--green);
-            box-shadow: 0 0 15px rgba(0, 168, 89, 0.4);
-            background: rgba(25, 25, 45, 0.8);
-        }
-
-        .futuristic-input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
-        }
-
+        .futuristic-input:focus { border-color: var(--green); box-shadow: 0 0 15px rgba(0,168,89,0.4); }
         .login-btn {
-            width: 100%;
-            padding: 14px;
-            margin-top: 10px;
-            background: linear-gradient(135deg, var(--green), #007a3f);
-            border: none;
-            border-radius: 8px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 3px;
-            color: var(--white);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(0, 168, 89, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%; padding: 14px; margin-top: 10px; background: linear-gradient(135deg, var(--green), #007a3f);
+            border: none; border-radius: 8px; font-family: 'Orbitron'; font-size: 1rem; font-weight: 700;
+            color: var(--white); cursor: pointer; text-transform: uppercase; box-shadow: 0 0 15px rgba(0,168,89,0.4);
         }
-
-        .login-btn:hover {
-            background: linear-gradient(135deg, #00c76a, #008a48);
-            box-shadow: 0 0 30px rgba(0, 168, 89, 0.7);
-            transform: scale(1.02);
-        }
-
-        .login-btn:active {
-            transform: scale(0.98);
-        }
-
-        .error-msg {
-            color: var(--red);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.8rem;
-            margin-top: 10px;
-            text-shadow: 0 0 8px var(--red);
-            min-height: 20px;
-            letter-spacing: 1px;
-        }
-
-        /* Container principal (inicialmente escondido) */
+        .login-btn:hover { background: linear-gradient(135deg, #00c76a, #008a48); }
+        .error-msg { color: var(--red); font-size: 0.8rem; min-height: 20px; margin-top: 10px; }
         .main-container {
-            position: relative;
-            z-index: 10;
-            width: 90%;
-            max-width: 650px;
-            padding: 40px 35px;
-            background: var(--card-bg);
-            border: 1.5px solid rgba(0, 168, 89, 0.25);
-            border-radius: 20px;
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            box-shadow:
-                0 0 30px rgba(0, 168, 89, 0.08),
-                0 0 80px rgba(206, 43, 55, 0.06),
-                0 20px 60px rgba(0, 0, 0, 0.6),
-                inset 0 1px 0 rgba(255, 255, 255, 0.03);
-            animation: containerPulse 4s ease-in-out infinite;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.5s ease;
+            position: relative; z-index: 10; width: 90%; max-width: 650px; padding: 40px 35px;
+            background: var(--card-bg); border: 1.5px solid rgba(0,168,89,0.25); border-radius: 20px;
+            backdrop-filter: blur(18px); display: none; opacity: 0; transition: opacity 0.5s;
         }
-
-        .main-container.visible {
-            display: block;
-            opacity: 1;
-        }
-
-        @keyframes containerPulse {
-            0%,
-            100% {
-                box-shadow: 0 0 30px rgba(0, 168, 89, 0.08), 0 0 80px rgba(206, 43, 55, 0.06), 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-            }
-            50% {
-                box-shadow: 0 0 45px rgba(0, 168, 89, 0.14), 0 0 100px rgba(206, 43, 55, 0.1), 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            }
-        }
-
-        .main-container::before {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: -1px;
-            right: -1px;
-            bottom: -1px;
-            border-radius: 20px;
-            padding: 1.5px;
-            background: linear-gradient(135deg, var(--green) 0%, transparent 25%, transparent 75%, var(--red) 100%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
-            z-index: -1;
-            animation: borderGlow 6s linear infinite;
-        }
-
-        /* Título */
-        .title-section {
-            text-align: center;
-            margin-bottom: 35px;
-            position: relative;
-        }
-
+        .main-container.visible { display: block; opacity: 1; }
         .title-badge {
-            display: inline-block;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: var(--white);
-            background: rgba(0, 168, 89, 0.15);
-            border: 1px solid rgba(0, 168, 89, 0.5);
-            border-radius: 30px;
-            padding: 8px 22px;
-            margin-bottom: 18px;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-            animation: badgeFlicker 5s ease-in-out infinite;
+            display: inline-block; font-family: 'Orbitron'; font-size: 0.9rem; letter-spacing: 4px; color: var(--white);
+            background: rgba(0,168,89,0.15); border: 1px solid rgba(0,168,89,0.5); border-radius: 30px; padding: 8px 22px; margin-bottom: 18px;
         }
-
-        @keyframes badgeFlicker {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            92% {
-                opacity: 1;
-            }
-            93% {
-                opacity: 0.7;
-            }
-            94% {
-                opacity: 1;
-            }
-            96% {
-                opacity: 0.8;
-            }
-            97% {
-                opacity: 1;
-            }
-        }
-
         .main-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: 3px;
-            background: linear-gradient(135deg, var(--green) 0%, var(--white) 50%, var(--red) 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: none;
-            filter: drop-shadow(0 0 20px rgba(0, 168, 89, 0.4));
-            margin: 0;
-            line-height: 1.3;
+            font-family: 'Orbitron'; font-size: 2rem; font-weight: 800; letter-spacing: 3px;
+            background: linear-gradient(135deg, var(--green), var(--white), var(--red));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-
-        /* Linha divisória */
-        .divider {
-            width: 60%;
-            height: 1px;
-            margin: 0 auto 30px;
-            background: linear-gradient(90deg, transparent, rgba(0, 168, 89, 0.5), transparent);
-            position: relative;
-        }
-        .divider::after {
-            content: '◆';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: var(--red);
-            font-size: 10px;
-            background: var(--dark-bg);
-            padding: 0 12px;
-            text-shadow: 0 0 8px var(--red), 0 0 20px var(--red);
-            animation: diamondPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes diamondPulse {
-            0%,
-            100% {
-                text-shadow: 0 0 8px var(--red), 0 0 20px var(--red);
-            }
-            50% {
-                text-shadow: 0 0 18px var(--red), 0 0 35px var(--red), 0 0 50px var(--green);
-            }
-        }
-
-        /* Lista */
-        .futuristic-list {
-            list-style: none;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
+        .user-info { font-family: 'Share Tech Mono'; font-size: 0.8rem; color: rgba(180,200,220,0.6); margin-top: 8px; }
+        .logout-link { color: var(--red); cursor: pointer; text-decoration: underline; margin-left: 10px; }
+        .divider { width: 60%; height: 1px; margin: 0 auto 30px; background: linear-gradient(90deg, transparent, rgba(0,168,89,0.5), transparent); position: relative; }
+        .divider::after { content: '◆'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--red); font-size: 10px; }
+        .futuristic-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
         .list-item {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px 20px;
-            background: rgba(20, 20, 35, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1.2);
-            overflow: hidden;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            display: flex; align-items: center; gap: 16px; padding: 16px 20px;
+            background: rgba(20,20,35,0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;
+            cursor: pointer; transition: all 0.35s; overflow: hidden;
         }
-
-        .list-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg,
-                    transparent,
-                    rgba(0, 168, 89, 0.06),
-                    transparent);
-            transition: left 0.6s ease;
-            z-index: 0;
-        }
-
-        .list-item:hover::before {
-            left: 100%;
-        }
-
-        .list-item:hover {
-            border-color: rgba(0, 168, 89, 0.5);
-            background: rgba(25, 25, 45, 0.7);
-            box-shadow:
-                0 0 20px rgba(0, 168, 89, 0.12),
-                0 8px 32px rgba(0, 0, 0, 0.5),
-                inset 0 0 30px rgba(0, 168, 89, 0.04);
-            transform: translateX(8px) scale(1.02);
-        }
-
-        .list-item:active {
-            transform: translateX(4px) scale(0.98);
-            transition: all 0.1s ease;
-        }
-
-        /* Ícone/indicador do item */
-        .item-indicator {
-            position: relative;
-            z-index: 1;
-            width: 44px;
-            height: 44px;
-            flex-shrink: 0;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            background: rgba(0, 168, 89, 0.08);
-            border: 1px solid rgba(0, 168, 89, 0.25);
-            transition: all 0.35s ease;
-            box-shadow: 0 0 0px rgba(0, 168, 89, 0);
-        }
-
-        .list-item:hover .item-indicator {
-            background: rgba(0, 168, 89, 0.15);
-            border-color: rgba(0, 168, 89, 0.7);
-            box-shadow: 0 0 25px rgba(0, 168, 89, 0.4), 0 0 50px rgba(0, 168, 89, 0.1);
-            animation: iconGlow 1.5s ease-in-out infinite;
-        }
-
-        @keyframes iconGlow {
-            0%,
-            100% {
-                box-shadow: 0 0 25px rgba(0, 168, 89, 0.4), 0 0 50px rgba(0, 168, 89, 0.1);
-            }
-            50% {
-                box-shadow: 0 0 40px rgba(0, 168, 89, 0.6), 0 0 70px rgba(206, 43, 55, 0.3);
-            }
-        }
-
-        /* Conteúdo do item */
-        .item-content {
-            position: relative;
-            z-index: 1;
-            flex: 1;
-            min-width: 0;
-        }
-        .item-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            letter-spacing: 2px;
-            color: #e0e8f0;
-            transition: color 0.35s ease;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .list-item:hover .item-title {
-            color: #ffffff;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-        .item-desc {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.72rem;
-            letter-spacing: 1.5px;
-            color: rgba(180, 190, 210, 0.5);
-            margin-top: 3px;
-            transition: color 0.35s ease;
-        }
-        .list-item:hover .item-desc {
-            color: rgba(200, 210, 230, 0.8);
-        }
-
-        /* Seta à direita */
-        .item-arrow {
-            position: relative;
-            z-index: 1;
-            flex-shrink: 0;
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.25);
-            transition: all 0.35s ease;
-            font-family: 'Orbitron', sans-serif;
-        }
-        .list-item:hover .item-arrow {
-            color: var(--green);
-            transform: translateX(6px);
-            text-shadow: 0 0 15px var(--green);
-        }
-
-        /* Barra de progresso inferior (decorativa) */
-        .status-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            color: rgba(180, 200, 220, 0.4);
-        }
-        .status-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--green);
-            box-shadow: 0 0 8px var(--green), 0 0 20px rgba(0, 168, 89, 0.6);
-            animation: dotPulse 2s ease-in-out infinite;
-            margin-right: 8px;
-        }
-        @keyframes dotPulse {
-            0%,
-            100% {
-                box-shadow: 0 0 8px var(--green), 0 0 20px rgba(0, 168, 89, 0.6);
-            }
-            50% {
-                box-shadow: 0 0 16px var(--green), 0 0 35px rgba(0, 168, 89, 0.9);
-            }
-        }
-        .status-info {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* ========== MODAIS ========== */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 200;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-box {
-            background: var(--card-bg);
-            border: 1.5px solid rgba(0, 168, 89, 0.3);
-            border-radius: 20px;
-            padding: 30px 25px;
-            width: 90%;
-            max-width: 480px;
-            box-shadow: 0 0 40px rgba(0, 168, 89, 0.2), 0 0 80px rgba(206, 43, 55, 0.1);
-            position: relative;
-            animation: modalPulse 4s ease-in-out infinite;
-        }
-
-        .modal-box::before {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: -1px;
-            right: -1px;
-            bottom: -1px;
-            border-radius: 20px;
-            padding: 1.5px;
-            background: linear-gradient(135deg, var(--green) 0%, transparent 25%, transparent 75%, var(--red) 100%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        @keyframes modalPulse {
-            0%,
-            100% {
-                box-shadow: 0 0 40px rgba(0, 168, 89, 0.2), 0 0 80px rgba(206, 43, 55, 0.1);
-            }
-            50% {
-                box-shadow: 0 0 55px rgba(0, 168, 89, 0.3), 0 0 100px rgba(206, 43, 55, 0.2);
-            }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .modal-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: var(--white);
-            text-shadow: 0 0 8px var(--green);
-        }
-
-        .modal-close {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(206, 43, 55, 0.2);
-            border: 1px solid rgba(206, 43, 55, 0.5);
-            color: var(--red);
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        .modal-close:hover {
-            background: rgba(206, 43, 55, 0.4);
-            box-shadow: 0 0 15px var(--red);
-            transform: rotate(90deg);
-        }
-
-        /* Calendário */
-        .calendar-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .calendar-nav button {
-            background: rgba(0, 168, 89, 0.15);
-            border: 1px solid rgba(0, 168, 89, 0.4);
-            color: var(--white);
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        .calendar-nav button:hover {
-            background: rgba(0, 168, 89, 0.3);
-            box-shadow: 0 0 12px var(--green);
-        }
-
-        .calendar-month-year {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            letter-spacing: 2px;
-            color: var(--white);
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            text-align: center;
-        }
-
-        .calendar-day-header {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.7rem;
-            letter-spacing: 1px;
-            color: var(--green);
-            padding: 8px 0;
-            text-transform: uppercase;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: rgba(255, 255, 255, 0.7);
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid transparent;
-        }
-
-        .calendar-day:hover {
-            background: rgba(0, 168, 89, 0.15);
-            border-color: rgba(0, 168, 89, 0.5);
-            color: #fff;
-            box-shadow: 0 0 10px rgba(0, 168, 89, 0.3);
-        }
-
-        .calendar-day.selected {
-            background: rgba(0, 168, 89, 0.4);
-            border-color: var(--green);
-            color: #fff;
-            box-shadow: 0 0 15px rgba(0, 168, 89, 0.6);
-            font-weight: bold;
-        }
-
-        .calendar-day.empty {
-            cursor: default;
-            background: transparent;
-            border: none;
-        }
-        .calendar-day.empty:hover {
-            background: transparent;
-            box-shadow: none;
-            border-color: transparent;
-        }
-
-        .calendar-info {
-            margin-top: 18px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            color: rgba(180, 200, 220, 0.7);
-            text-align: center;
-        }
-
-        /* Campos de diárias e taxas */
-        .taxes-fields {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-top: 10px;
-        }
-
-        .tax-field {
-            text-align: left;
-        }
-
-        .tax-field label {
-            display: block;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            color: var(--green);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-        }
-
-        .tax-field input {
-            width: 100%;
-            padding: 12px 15px;
-            background: rgba(20, 20, 35, 0.7);
-            border: 1px solid rgba(0, 168, 89, 0.3);
-            border-radius: 8px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 1rem;
-            color: var(--white);
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .tax-field input:focus {
-            border-color: var(--green);
-            box-shadow: 0 0 15px rgba(0, 168, 89, 0.4);
-            background: rgba(25, 25, 45, 0.8);
-        }
-
-        .save-btn {
-            width: 100%;
-            padding: 12px;
-            margin-top: 8px;
-            background: linear-gradient(135deg, var(--green), #007a3f);
-            border: none;
-            border-radius: 8px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: var(--white);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            box-shadow: 0 0 12px rgba(0, 168, 89, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .save-btn:hover {
-            background: linear-gradient(135deg, #00c76a, #008a48);
-            box-shadow: 0 0 25px rgba(0, 168, 89, 0.6);
-        }
-
-        /* Responsividade */
-        @media (max-width: 600px) {
-            .main-container {
-                padding: 25px 18px;
-                border-radius: 14px;
-                width: 94%;
-            }
-            .main-title {
-                font-size: 1.3rem;
-                letter-spacing: 1.5px;
-            }
-            .list-item {
-                padding: 12px 14px;
-                gap: 10px;
-                border-radius: 10px;
-            }
-            .item-indicator {
-                width: 36px;
-                height: 36px;
-                border-radius: 8px;
-                font-size: 1rem;
-            }
-            .item-title {
-                font-size: 0.8rem;
-                letter-spacing: 1px;
-            }
-            .item-desc {
-                font-size: 0.65rem;
-            }
-            .title-badge {
-                font-size: 0.7rem;
-                letter-spacing: 3px;
-                padding: 6px 16px;
-            }
-            .overlay-box {
-                padding: 25px 20px;
-            }
-            .loading-text {
-                font-size: 1.2rem;
-            }
-            .login-title {
-                font-size: 1.1rem;
-            }
-            .modal-box {
-                padding: 20px 16px;
-            }
-            .calendar-day {
-                font-size: 0.75rem;
-            }
-        }
+        .list-item:hover { border-color: rgba(0,168,89,0.5); background: rgba(25,25,45,0.7); transform: translateX(8px); }
+        .item-indicator { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; background: rgba(0,168,89,0.08); border: 1px solid rgba(0,168,89,0.25); }
+        .item-title { font-family: 'Orbitron'; font-size: 0.95rem; color: #e0e8f0; }
+        .item-desc { font-family: 'Share Tech Mono'; font-size: 0.72rem; color: rgba(180,190,210,0.5); }
+        .item-arrow { font-size: 1.2rem; color: rgba(255,255,255,0.25); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; background: rgba(0,0,0,0.8); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box { background: var(--card-bg); border: 1.5px solid rgba(0,168,89,0.3); border-radius: 20px; padding: 30px 25px; width: 90%; max-width: 500px; position: relative; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .modal-title { font-family: 'Orbitron'; font-size: 1.2rem; color: var(--white); }
+        .modal-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(206,43,55,0.2); border: 1px solid rgba(206,43,55,0.5); color: var(--red); font-size: 1.2rem; cursor: pointer; }
+        .entregador-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.06); color: #d0d8e0; }
+        .entregador-item button { background: rgba(206,43,55,0.2); border: 1px solid rgba(206,43,55,0.5); color: var(--red); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        @media (max-width: 600px) { .main-container { padding: 25px 18px; } .main-title { font-size: 1.3rem; } }
     </style>
 </head>
 <body>
+    <div class="grid-overlay"></div><div class="scanlines"></div><canvas id="particlesCanvas"></canvas>
 
-    <!-- Grid de fundo animada -->
-    <div class="grid-overlay"></div>
-
-    <!-- Scanlines -->
-    <div class="scanlines"></div>
-
-    <!-- Canvas para partículas -->
-    <canvas id="particlesCanvas"></canvas>
-
-    <!-- ==================== TELA DE CARREGAMENTO ==================== -->
     <div id="loadingScreen" class="overlay-screen">
         <div class="overlay-box">
             <div class="loading-text">💰💲 CARREGANDO</div>
-            <div class="loader-bar-bg">
-                <div id="loaderBar" class="loader-bar-fill" style="width: 0%;"></div>
-            </div>
+            <div class="loader-bar-bg"><div id="loaderBar" class="loader-bar-fill" style="width:0%;"></div></div>
             <div class="loading-sub" id="loadingPercent">0%</div>
         </div>
     </div>
 
-    <!-- ==================== TELA DE LOGIN ==================== -->
     <div id="loginScreen" class="overlay-screen hidden">
         <div class="overlay-box">
             <div class="login-title">🔐 ACESSO RESTRITO</div>
-            <div class="input-group">
-                <label>👤 USUÁRIO</label>
-                <input type="text" id="usernameInput" class="futuristic-input" placeholder="Digite o usuário" autocomplete="off">
-            </div>
-            <div class="input-group">
-                <label>🔑 SENHA</label>
-                <input type="password" id="passwordInput" class="futuristic-input" placeholder="Digite a senha">
-            </div>
+            <div class="input-group"><label>👤 USUÁRIO</label><input type="text" id="usernameInput" class="futuristic-input" placeholder="Digite o usuário"></div>
+            <div class="input-group"><label>🔑 SENHA</label><input type="password" id="passwordInput" class="futuristic-input" placeholder="Digite a senha"></div>
             <button id="loginBtn" class="login-btn">ENTRAR</button>
             <div id="loginError" class="error-msg"></div>
         </div>
     </div>
 
-    <!-- ==================== CONTEÚDO PRINCIPAL ==================== -->
     <div id="mainContent" class="main-container">
-        <div class="title-section">
+        <div class="title-section" style="text-align:center; margin-bottom:35px;">
             <span class="title-badge">💰💲</span>
             <h1 class="main-title">CONTROLE<br>FINANCEIRO</h1>
+            <div class="user-info">Logado como: <span id="loggedUserDisplay"></span><span class="logout-link" id="logoutBtn">[SAIR]</span></div>
         </div>
         <div class="divider"></div>
         <ul class="futuristic-list">
-            <li class="list-item" id="itemDiasRodados">
-                <div class="item-indicator">📅</div>
-                <div class="item-content">
-                    <div class="item-title">Dias Rodados</div>
-                    <div class="item-desc" id="diasRodadosInfo">Clique para registrar</div>
-                </div>
-                <span class="item-arrow">▶</span>
-            </li>
-            <li class="list-item" id="itemDiariasTaxas">
-                <div class="item-indicator">💲</div>
-                <div class="item-content">
-                    <div class="item-title">Diárias e Taxas</div>
-                    <div class="item-desc" id="diariasTaxasInfo">Diárias, taxas e descontos</div>
-                </div>
-                <span class="item-arrow">▶</span>
-            </li>
-            <li class="list-item">
-                <div class="item-indicator">🎯</div>
-                <div class="item-content">
-                    <div class="item-title">Metas — Alcançadas</div>
-                    <div class="item-desc">Viagem, Carro, Curso</div>
-                </div>
-                <span class="item-arrow">▶</span>
-            </li>
+            <li class="list-item" id="itemDiasRodados"><div class="item-indicator">📅</div><div class="item-content"><div class="item-title">Dias Rodados</div><div class="item-desc" id="diasRodadosInfo"></div></div><span class="item-arrow">▶</span></li>
+            <li class="list-item" id="itemDiariasTaxas"><div class="item-indicator">💲</div><div class="item-content"><div class="item-title">Diárias e Taxas</div><div class="item-desc" id="diariasTaxasInfo"></div></div><span class="item-arrow">▶</span></li>
+            <li class="list-item" id="itemTabelaBairros"><div class="item-indicator">🏙️</div><div class="item-content"><div class="item-title">Tabela de Bairros</div><div class="item-desc"></div></div><span class="item-arrow">▶</span></li>
+            <li class="list-item admin-only" id="itemCadastroEntregadores" style="display:none;"><div class="item-indicator">🧑‍💼</div><div class="item-content"><div class="item-title">Cadastro de Entregadores</div><div class="item-desc" id="entregadoresCount"></div></div><span class="item-arrow">▶</span></li>
         </ul>
-        <div class="status-bar">
-            <div class="status-info">
-                <span class="status-dot"></span>
-                <span>FINANÇAS OK</span>
-            </div>
-            <span>v2.4.1 ▸ ESTÁVEL</span>
-            <span id="currentTime">22:47:08 UTC</span>
-        </div>
     </div>
 
-    <!-- ==================== MODAL CALENDÁRIO ==================== -->
-    <div id="calendarModal" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-header">
-                <span class="modal-title">📅 DIAS RODADOS</span>
-                <button class="modal-close" id="closeCalendarModal">✕</button>
-            </div>
-            <div class="calendar-nav">
-                <button id="prevMonth">◀</button>
-                <span class="calendar-month-year" id="monthYearDisplay"></span>
-                <button id="nextMonth">▶</button>
-            </div>
-            <div class="calendar-grid" id="calendarDaysGrid">
-                <!-- Preenchido via JS -->
-            </div>
-            <div class="calendar-info" id="calendarInfo">Selecione os dias rodados</div>
-        </div>
-    </div>
+    <!-- Modal Calendário -->
+    <div id="calendarModal" class="modal-overlay"><div class="modal-box"><div class="modal-header"><span class="modal-title">📅 DIAS RODADOS</span><button class="modal-close" id="closeCalendarModal">✕</button></div><div class="calendar-nav"><button id="prevMonth">◀</button><span class="calendar-month-year" id="monthYearDisplay"></span><button id="nextMonth">▶</button></div><div class="calendar-grid" id="calendarDaysGrid"></div><div class="calendar-info" id="calendarInfo" style="margin-top:12px; color:rgba(180,200,220,0.7);">Selecione os dias</div></div></div>
 
-    <!-- ==================== MODAL DIÁRIAS E TAXAS ==================== -->
-    <div id="taxesModal" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-header">
-                <span class="modal-title">💲 DIÁRIAS E TAXAS</span>
-                <button class="modal-close" id="closeTaxesModal">✕</button>
-            </div>
-            <div class="taxes-fields">
-                <div class="tax-field">
-                    <label>🏨 DIÁRIAS</label>
-                    <input type="number" id="diariasInput" placeholder="R$ 0,00" step="0.01" min="0">
-                </div>
-                <div class="tax-field">
-                    <label>📋 TAXAS</label>
-                    <input type="number" id="taxasInput" placeholder="R$ 0,00" step="0.01" min="0">
-                </div>
-                <div class="tax-field">
-                    <label>🔻 DESCONTOS</label>
-                    <input type="number" id="descontosInput" placeholder="R$ 0,00" step="0.01" min="0">
-                </div>
-                <button class="save-btn" id="saveTaxesBtn">💾 SALVAR VALORES</button>
-                <div class="calendar-info" id="taxesInfo" style="margin-top: 10px;">Valores atualizados</div>
+    <!-- Modal Diárias e Taxas -->
+    <div id="taxesModal" class="modal-overlay"><div class="modal-box"><div class="modal-header"><span class="modal-title">💲 DIÁRIAS E TAXAS</span><button class="modal-close" id="closeTaxesModal">✕</button></div><div style="display:flex;flex-direction:column;gap:16px;"><div class="tax-field"><label>🏨 DIÁRIAS</label><input type="number" id="diariasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01"></div><div class="tax-field"><label>📋 TAXAS</label><input type="number" id="taxasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01"></div><div class="tax-field"><label>🔻 DESCONTOS</label><input type="number" id="descontosInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01"></div><button id="saveTaxesBtn" class="login-btn">💾 SALVAR</button><div id="taxesInfo" style="font-family:'Share Tech Mono';font-size:0.75rem;color:rgba(180,200,220,0.7);text-align:center;"></div></div></div></div>
+
+    <!-- Modal Tabela de Bairros -->
+    <div id="bairrosModal" class="modal-overlay"><div class="modal-box" style="max-width:550px;"><div class="modal-header"><span class="modal-title">🏙️ TABELA DE BAIRROS</span><button class="modal-close" id="closeBairrosModal">✕</button></div><table class="bairros-table" style="width:100%;border-collapse:collapse;color:#d0d8e0;"><thead><tr><th>Bairro</th><th>Diária (R$)</th><th>Taxa (R$)</th></tr></thead><tbody><tr><td>Centro</td><td>150,00</td><td>12,00</td></tr><tr><td>Jardim Europa</td><td>200,00</td><td>18,00</td></tr><tr><td>Vila Mariana</td><td>180,00</td><td>15,00</td></tr><tr><td>Bela Vista</td><td>170,00</td><td>14,00</td></tr><tr><td>Moema</td><td>220,00</td><td>20,00</td></tr><tr><td>Itaim Bibi</td><td>250,00</td><td>22,00</td></tr></tbody></table></div></div>
+
+    <!-- Modal Cadastro de Entregadores -->
+    <div id="entregadoresModal" class="modal-overlay">
+        <div class="modal-box" style="max-width:550px;">
+            <div class="modal-header"><span class="modal-title">🧑‍💼 CADASTRO DE ENTREGADORES</span><button class="modal-close" id="closeEntregadoresModal">✕</button></div>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+                <div class="input-group"><label>👤 NOME COMPLETO</label><input type="text" id="entregadorNome" class="futuristic-input" placeholder="Nome do entregador"></div>
+                <div class="input-group"><label>🔑 SENHA DE ACESSO</label><input type="password" id="entregadorSenha" class="futuristic-input" placeholder="Digite a senha"></div>
+                <div class="input-group"><label>🔁 CONFIRMAR SENHA</label><input type="password" id="entregadorConfirmaSenha" class="futuristic-input" placeholder="Repita a senha"></div>
+                <button type="button" id="addEntregadorBtn" class="login-btn" style="margin-top:6px;" onclick="realizarCadastroEntregador()">➕ CADASTRAR E ACESSAR</button>
+                <div id="entregadorMsg" style="font-family:'Share Tech Mono';font-size:0.75rem;color:rgba(180,200,220,0.7);text-align:center;min-height:20px;"></div>
+                <div style="margin-top:10px;"><div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);letter-spacing:2px;margin-bottom:10px;">ENTREGADORES CADASTRADOS</div><div id="entregadoresLista" style="max-height:200px;overflow-y:auto;"></div></div>
             </div>
         </div>
     </div>
 
     <script>
-        // ========== ELEMENTOS DOM ==========
+        // Elementos do DOM
         const loadingScreen = document.getElementById('loadingScreen');
         const loginScreen = document.getElementById('loginScreen');
         const mainContent = document.getElementById('mainContent');
@@ -1073,357 +177,177 @@
         const passwordInput = document.getElementById('passwordInput');
         const loginBtn = document.getElementById('loginBtn');
         const loginError = document.getElementById('loginError');
-        const currentTimeSpan = document.getElementById('currentTime');
-
-        // Modais
+        const loggedUserDisplay = document.getElementById('loggedUserDisplay');
+        const logoutBtn = document.getElementById('logoutBtn');
         const calendarModal = document.getElementById('calendarModal');
         const taxesModal = document.getElementById('taxesModal');
-        const closeCalendarModal = document.getElementById('closeCalendarModal');
-        const closeTaxesModal = document.getElementById('closeTaxesModal');
-
-        // Itens da lista
-        const itemDiasRodados = document.getElementById('itemDiasRodados');
-        const itemDiariasTaxas = document.getElementById('itemDiariasTaxas');
+        const bairrosModal = document.getElementById('bairrosModal');
+        const entregadoresModal = document.getElementById('entregadoresModal');
+        const itemCadastroEntregadores = document.getElementById('itemCadastroEntregadores');
         const diasRodadosInfo = document.getElementById('diasRodadosInfo');
         const diariasTaxasInfo = document.getElementById('diariasTaxasInfo');
-
-        // Calendário
+        const entregadoresCount = document.getElementById('entregadoresCount');
         const monthYearDisplay = document.getElementById('monthYearDisplay');
         const calendarDaysGrid = document.getElementById('calendarDaysGrid');
         const calendarInfo = document.getElementById('calendarInfo');
         const prevMonthBtn = document.getElementById('prevMonth');
         const nextMonthBtn = document.getElementById('nextMonth');
-
-        // Diárias e taxas
         const diariasInput = document.getElementById('diariasInput');
         const taxasInput = document.getElementById('taxasInput');
         const descontosInput = document.getElementById('descontosInput');
         const saveTaxesBtn = document.getElementById('saveTaxesBtn');
         const taxesInfo = document.getElementById('taxesInfo');
+        const entregadorNome = document.getElementById('entregadorNome');
+        const entregadorSenha = document.getElementById('entregadorSenha');
+        const entregadorConfirmaSenha = document.getElementById('entregadorConfirmaSenha');
+        const addEntregadorBtn = document.getElementById('addEntregadorBtn');
+        const entregadorMsg = document.getElementById('entregadorMsg');
+        const entregadoresLista = document.getElementById('entregadoresLista');
 
-        // ========== CREDENCIAIS ==========
-        const VALID_USER = "admin";
-        const VALID_PASS = "123";
+        const ADMIN_USER = "admin", ADMIN_PASS = "123";
+        let currentDate = new Date(), selectedDays = new Set(), loggedUser = null;
 
-        // ========== ESTADO DO CALENDÁRIO ==========
-        let currentDate = new Date();
-        let selectedDays = new Set(); // armazena strings "YYYY-MM-DD"
-
-        // ========== SIMULAÇÃO DE CARREGAMENTO ==========
-        let progress = 0;
-        const loadingInterval = setInterval(() => {
-            progress += Math.floor(Math.random() * 8) + 2;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(loadingInterval);
-                loaderBar.style.width = '100%';
-                loadingPercent.textContent = '100%';
-                setTimeout(() => {
-                    loadingScreen.classList.add('hidden');
-                    loginScreen.classList.remove('hidden');
-                    usernameInput.focus();
-                }, 600);
-            } else {
-                loaderBar.style.width = progress + '%';
-                loadingPercent.textContent = progress + '%';
-            }
-        }, 100);
-
-        // ========== FUNÇÃO DE LOGIN ==========
-        function attemptLogin() {
-            const user = usernameInput.value.trim();
-            const pass = passwordInput.value.trim();
-            if (user === VALID_USER && pass === VALID_PASS) {
-                loginError.textContent = '';
-                loginScreen.classList.add('hidden');
-                mainContent.classList.add('visible');
-                updateTime();
-                setInterval(updateTime, 1000);
-            } else {
-                loginError.textContent = '⚠️ ACESSO NEGADO: Credenciais inválidas';
-                passwordInput.value = '';
-                passwordInput.focus();
-                passwordInput.style.animation = 'shake 0.4s ease';
-                setTimeout(() => {
-                    passwordInput.style.animation = '';
-                }, 400);
-            }
+        // LocalStorage
+        function getEntregadores() { return JSON.parse(localStorage.getItem('entregadores') || '[]'); }
+        function saveEntregadores(arr) { localStorage.setItem('entregadores', JSON.stringify(arr)); }
+        function addEntregador(nome, senha) {
+            const entregadores = getEntregadores();
+            if (entregadores.find(e => e.nome.toLowerCase() === nome.toLowerCase())) return { success: false, message: '⚠️ Entregador já cadastrado!' };
+            if (nome.toLowerCase() === ADMIN_USER) return { success: false, message: '⚠️ Nome reservado!' };
+            entregadores.push({ nome, senha });
+            saveEntregadores(entregadores);
+            return { success: true, message: '✅ Entregador cadastrado!' };
         }
+        function removeEntregador(nome) { saveEntregadores(getEntregadores().filter(e => e.nome !== nome)); }
+        function renderEntregadoresLista() {
+            const arr = getEntregadores();
+            entregadoresLista.innerHTML = arr.length === 0 ? '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhum entregador</div>' : arr.map(e => `<div class="entregador-item"><span>🧑 ${e.nome}</span><button class="remove-entregador" data-nome="${e.nome}">🗑️ REMOVER</button></div>`).join('');
+            document.querySelectorAll('.remove-entregador').forEach(b => b.addEventListener('click', (ev) => {
+                removeEntregador(ev.target.dataset.nome);
+                renderEntregadoresLista();
+                updateEntregadoresCount();
+            }));
+            updateEntregadoresCount();
+        }
+        function updateEntregadoresCount() { entregadoresCount.textContent = getEntregadores().length ? `${getEntregadores().length} entregador(es)` : ''; }
 
-        // Animação de shake
-        const shakeKeyframes = `
-            @keyframes shake {
-                0%,100% { transform: translateX(0); }
-                25% { transform: translateX(-8px); }
-                50% { transform: translateX(8px); }
-                75% { transform: translateX(-5px); }
+        // Cadastro
+        window.realizarCadastroEntregador = function() {
+            const nome = entregadorNome.value.trim();
+            const senha = entregadorSenha.value;
+            const confirma = entregadorConfirmaSenha.value;
+            if (!nome || !senha || !confirma) { entregadorMsg.textContent = '⚠️ Preencha todos os campos'; entregadorMsg.style.color = '#ce2b37'; return; }
+            if (senha !== confirma) { entregadorMsg.textContent = '⚠️ Senhas não conferem'; entregadorMsg.style.color = '#ce2b37'; return; }
+            const result = addEntregador(nome, senha);
+            entregadorMsg.textContent = result.message;
+            entregadorMsg.style.color = result.success ? '#00a859' : '#ce2b37';
+            if (result.success) {
+                entregadoresModal.classList.remove('active');
+                loggedUser = { username: nome, isAdmin: false };
+                entrarNoSistema();
+                entregadorNome.value = ''; entregadorSenha.value = ''; entregadorConfirmaSenha.value = '';
             }
-        `;
-        const styleSheet = document.createElement("style");
-        styleSheet.textContent = shakeKeyframes;
-        document.head.appendChild(styleSheet);
+            setTimeout(() => { entregadorMsg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
+        };
+
+        // Login
+        function attemptLogin() {
+            const u = usernameInput.value.trim(), p = passwordInput.value.trim();
+            if (!u || !p) { loginError.textContent = '⚠️ Preencha todos os campos'; return; }
+            if (u === ADMIN_USER && p === ADMIN_PASS) { loggedUser = { username: ADMIN_USER, isAdmin: true }; entrarNoSistema(); return; }
+            const ent = getEntregadores().find(e => e.nome.toLowerCase() === u.toLowerCase() && e.senha === p);
+            if (ent) { loggedUser = { username: ent.nome, isAdmin: false }; entrarNoSistema(); return; }
+            loginError.textContent = '⚠️ ACESSO NEGADO'; passwordInput.value = ''; passwordInput.focus();
+        }
+        function entrarNoSistema() {
+            loginScreen.classList.add('hidden');
+            mainContent.classList.add('visible');
+            loggedUserDisplay.textContent = loggedUser.username;
+            itemCadastroEntregadores.style.display = loggedUser.isAdmin ? 'flex' : 'none';
+            if (loggedUser.isAdmin) updateEntregadoresCount();
+            usernameInput.value = ''; passwordInput.value = '';
+        }
+        function logout() { loggedUser = null; mainContent.classList.remove('visible'); loginScreen.classList.remove('hidden'); usernameInput.focus(); }
 
         loginBtn.addEventListener('click', attemptLogin);
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') attemptLogin();
-        });
-        usernameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') passwordInput.focus();
-        });
+        passwordInput.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+        usernameInput.addEventListener('keydown', e => { if (e.key === 'Enter') passwordInput.focus(); });
+        logoutBtn.addEventListener('click', logout);
 
-        // ========== ATUALIZAÇÃO DO RELÓGIO ==========
-        function updateTime() {
-            const now = new Date();
-            const utc = now.toISOString().split('T')[1].split('.')[0] + ' UTC';
-            currentTimeSpan.textContent = utc;
-        }
+        // Loading
+        let progress = 0;
+        const loadingInterval = setInterval(() => {
+            progress += Math.floor(Math.random()*8)+2;
+            if (progress >= 100) { progress = 100; clearInterval(loadingInterval); loaderBar.style.width = '100%'; loadingPercent.textContent = '100%'; setTimeout(() => { loadingScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); usernameInput.focus(); }, 600); }
+            else { loaderBar.style.width = progress+'%'; loadingPercent.textContent = progress+'%'; }
+        }, 100);
 
-        // ========== ABRIR / FECHAR MODAIS ==========
-        itemDiasRodados.addEventListener('click', () => {
-            calendarModal.classList.add('active');
-            renderCalendar();
-        });
+        // Modais
+        document.getElementById('itemDiasRodados').addEventListener('click', () => { calendarModal.classList.add('active'); renderCalendar(); });
+        document.getElementById('itemDiariasTaxas').addEventListener('click', () => { taxesModal.classList.add('active'); diariasInput.focus(); });
+        document.getElementById('itemTabelaBairros').addEventListener('click', () => { bairrosModal.classList.add('active'); });
+        itemCadastroEntregadores.addEventListener('click', () => { entregadoresModal.classList.add('active'); renderEntregadoresLista(); entregadorNome.focus(); });
+        document.getElementById('closeCalendarModal').addEventListener('click', () => calendarModal.classList.remove('active'));
+        document.getElementById('closeTaxesModal').addEventListener('click', () => taxesModal.classList.remove('active'));
+        document.getElementById('closeBairrosModal').addEventListener('click', () => bairrosModal.classList.remove('active'));
+        document.getElementById('closeEntregadoresModal').addEventListener('click', () => entregadoresModal.classList.remove('active'));
+        calendarModal.addEventListener('click', e => { if (e.target === calendarModal) calendarModal.classList.remove('active'); });
+        taxesModal.addEventListener('click', e => { if (e.target === taxesModal) taxesModal.classList.remove('active'); });
+        bairrosModal.addEventListener('click', e => { if (e.target === bairrosModal) bairrosModal.classList.remove('active'); });
+        entregadoresModal.addEventListener('click', e => { if (e.target === entregadoresModal) entregadoresModal.classList.remove('active'); });
 
-        itemDiariasTaxas.addEventListener('click', () => {
-            taxesModal.classList.add('active');
-            diariasInput.focus();
-        });
+        // Eventos de tecla no cadastro
+        entregadorNome.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); entregadorSenha.focus(); } });
+        entregadorSenha.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); entregadorConfirmaSenha.focus(); } });
+        entregadorConfirmaSenha.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); window.realizarCadastroEntregador(); } });
 
-        closeCalendarModal.addEventListener('click', () => {
-            calendarModal.classList.remove('active');
-        });
-
-        closeTaxesModal.addEventListener('click', () => {
-            taxesModal.classList.remove('active');
-        });
-
-        // Fechar modais ao clicar fora deles
-        calendarModal.addEventListener('click', (e) => {
-            if (e.target === calendarModal) calendarModal.classList.remove('active');
-        });
-        taxesModal.addEventListener('click', (e) => {
-            if (e.target === taxesModal) taxesModal.classList.remove('active');
-        });
-
-        // ========== CALENDÁRIO ==========
-        function formatDateKey(year, month, day) {
-            return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        }
-
+        // Calendário
+        function formatDateKey(y,m,d){ return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
         function renderCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-
-            const monthNames = [
-                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-            ];
-            monthYearDisplay.textContent = `${monthNames[month]} ${year}`;
-
-            const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 = Domingo
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
+            const y = currentDate.getFullYear(), m = currentDate.getMonth();
+            monthYearDisplay.textContent = `${['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][m]} ${y}`;
             calendarDaysGrid.innerHTML = '';
-
-            // Cabeçalhos dos dias da semana
-            const dayHeaders = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-            dayHeaders.forEach(header => {
-                const headerEl = document.createElement('div');
-                headerEl.className = 'calendar-day-header';
-                headerEl.textContent = header;
-                calendarDaysGrid.appendChild(headerEl);
-            });
-
-            // Dias vazios antes do primeiro dia
-            for (let i = 0; i < firstDayOfMonth; i++) {
-                const emptyDay = document.createElement('div');
-                emptyDay.className = 'calendar-day empty';
-                calendarDaysGrid.appendChild(emptyDay);
-            }
-
-            // Dias do mês
-            const today = new Date();
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dayEl = document.createElement('div');
-                dayEl.className = 'calendar-day';
-                dayEl.textContent = day;
-
-                const dateKey = formatDateKey(year, month, day);
-                if (selectedDays.has(dateKey)) {
-                    dayEl.classList.add('selected');
-                }
-
+            ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(d => { const h = document.createElement('div'); h.className = 'calendar-day-header'; h.textContent = d; calendarDaysGrid.appendChild(h); });
+            for (let i=0; i<new Date(y,m,1).getDay(); i++) { const empty = document.createElement('div'); empty.className = 'calendar-day empty'; calendarDaysGrid.appendChild(empty); }
+            for (let d=1; d<=new Date(y,m+1,0).getDate(); d++) {
+                const dayEl = document.createElement('div'); dayEl.className = 'calendar-day'; dayEl.textContent = d;
+                const key = formatDateKey(y,m,d); if (selectedDays.has(key)) dayEl.classList.add('selected');
                 dayEl.addEventListener('click', () => {
-                    if (selectedDays.has(dateKey)) {
-                        selectedDays.delete(dateKey);
-                        dayEl.classList.remove('selected');
-                    } else {
-                        selectedDays.add(dateKey);
-                        dayEl.classList.add('selected');
-                    }
-                    updateDiasRodadosInfo();
-                    calendarInfo.textContent = `${selectedDays.size} dias rodados selecionados`;
+                    if (selectedDays.has(key)) { selectedDays.delete(key); dayEl.classList.remove('selected'); }
+                    else { selectedDays.add(key); dayEl.classList.add('selected'); }
+                    diasRodadosInfo.textContent = selectedDays.size ? `${selectedDays.size} dias` : '';
+                    calendarInfo.textContent = `${selectedDays.size} dias selecionados`;
                 });
-
                 calendarDaysGrid.appendChild(dayEl);
             }
-
-            calendarInfo.textContent = `${selectedDays.size} dias rodados selecionados`;
         }
-
-        function updateDiasRodadosInfo() {
-            if (selectedDays.size === 0) {
-                diasRodadosInfo.textContent = 'Clique para registrar';
-            } else {
-                diasRodadosInfo.textContent = `${selectedDays.size} dias registrados`;
-            }
-        }
-
-        prevMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar();
-        });
-
-        nextMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
-        });
-
-        // ========== DIÁRIAS E TAXAS ==========
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-        }
+        prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); });
+        nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); });
 
         saveTaxesBtn.addEventListener('click', () => {
-            const diarias = parseFloat(diariasInput.value) || 0;
-            const taxas = parseFloat(taxasInput.value) || 0;
-            const descontos = parseFloat(descontosInput.value) || 0;
-            const total = diarias + taxas - descontos;
-
-            diariasTaxasInfo.textContent = `Total: ${formatCurrency(total)}`;
-            taxesInfo.textContent = `✅ Salvo: Diárias ${formatCurrency(diarias)} + Taxas ${formatCurrency(taxas)} - Desc. ${formatCurrency(descontos)} = ${formatCurrency(total)}`;
-            taxesInfo.style.color = '#00a859';
-            taxesInfo.style.textShadow = '0 0 8px rgba(0,168,89,0.5)';
-
-            setTimeout(() => {
-                taxesInfo.style.color = 'rgba(180,200,220,0.7)';
-                taxesInfo.style.textShadow = 'none';
-            }, 2000);
+            const d = parseFloat(diariasInput.value)||0, t = parseFloat(taxasInput.value)||0, desc = parseFloat(descontosInput.value)||0;
+            diariasTaxasInfo.textContent = `Total: R$ ${(d+t-desc).toFixed(2)}`;
+            taxesInfo.textContent = `✅ Salvo: Diárias ${d.toFixed(2)} + Taxas ${t.toFixed(2)} - Desc. ${desc.toFixed(2)}`;
         });
 
-        // ========== PARTÍCULAS NO FUNDO ==========
-        const canvas = document.getElementById('particlesCanvas');
-        const ctx = canvas.getContext('2d');
+        // Partículas
+        const canvas = document.getElementById('particlesCanvas'), ctx = canvas.getContext('2d');
         let particles = [];
-        const particleCount = 80;
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            initParticles();
-        });
-
+        function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+        resize(); window.addEventListener('resize', resize);
         class Particle {
-            constructor() {
-                this.reset();
-            }
+            constructor() { this.reset(); }
             reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.8 + 0.4;
-                this.speedX = (Math.random() - 0.5) * 0.4;
-                this.speedY = (Math.random() - 0.5) * 0.4;
-                this.opacity = Math.random() * 0.6 + 0.2;
-                this.opacityDirection = Math.random() > 0.5 ? 1 : -1;
-                this.opacitySpeed = Math.random() * 0.008 + 0.003;
-                this.color = Math.random() < 0.5 ?
-                    `rgba(0, 168, 89, ${this.opacity})` :
-                    `rgba(206, 43, 55, ${this.opacity})`;
+                this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height;
+                this.vx = (Math.random()-0.5)*0.4; this.vy = (Math.random()-0.5)*0.4;
+                this.size = Math.random()*1.8+0.4; this.opacity = Math.random()*0.6+0.2;
             }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                this.opacity += this.opacityDirection * this.opacitySpeed;
-                if (this.opacity >= 0.7) this.opacityDirection = -1;
-                if (this.opacity <= 0.15) this.opacityDirection = 1;
-                this.color = this.color.replace(/[\d\.]+\)$/, `${this.opacity})`);
-                if (this.x < -20) this.x = canvas.width + 20;
-                if (this.x > canvas.width + 20) this.x = -20;
-                if (this.y < -20) this.y = canvas.height + 20;
-                if (this.y > canvas.height + 20) this.y = -20;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
-                ctx.fillStyle = this.color.replace(/[\d\.]+\)$/, `${this.opacity * 0.25})`);
-                ctx.fill();
-            }
+            update() { this.x += this.vx; this.y += this.vy; if (this.x<0) this.x=canvas.width; if (this.x>canvas.width) this.x=0; if (this.y<0) this.y=canvas.height; if (this.y>canvas.height) this.y=0; }
+            draw() { ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fillStyle = `rgba(0,168,89,${this.opacity})`; ctx.fill(); }
         }
-
-        function initParticles() {
-            particles = [];
-            for (let i = 0; i < particleCount; i++) {
-                particles.push(new Particle());
-            }
-        }
-        initParticles();
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 100) {
-                        const alpha = (1 - dist / 100) * 0.12;
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(0, 168, 89, ${alpha})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animateParticles);
-        }
-        animateParticles();
-
-        window.addEventListener('click', (e) => {
-            const clickX = e.clientX;
-            const clickY = e.clientY;
-            for (let i = 0; i < 15; i++) {
-                const angle = (Math.PI * 2 / 15) * i;
-                const speed = Math.random() * 3 + 2;
-                const p = new Particle();
-                p.x = clickX;
-                p.y = clickY;
-                p.speedX = Math.cos(angle) * speed;
-                p.speedY = Math.sin(angle) * speed;
-                p.size = Math.random() * 2.5 + 1;
-                p.opacity = 0.8;
-                p.opacityDirection = -1;
-                p.opacitySpeed = 0.02;
-                p.color = `rgba(206, 43, 55, ${p.opacity})`;
-                particles.push(p);
-            }
-            if (particles.length > 200) {
-                particles.splice(0, particles.length - 200);
-            }
-        });
+        for (let i=0;i<80;i++) particles.push(new Particle());
+        function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
+        animate();
     </script>
 </body>
 </html>
