@@ -60,10 +60,7 @@
             border-radius: 8px; font-family: 'Share Tech Mono'; font-size: 1rem; color: var(--white); outline: none;
         }
         .futuristic-input:focus { border-color: var(--green); box-shadow: 0 0 15px rgba(0,168,89,0.4); }
-        .futuristic-input.readonly:focus {
-            border-color: rgba(0,168,89,0.3) !important;
-            box-shadow: none !important;
-        }
+        .futuristic-input.readonly:focus { border-color: rgba(0,168,89,0.3) !important; box-shadow: none !important; }
         select.futuristic-input {
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2300a859' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
@@ -72,10 +69,7 @@
             padding-right: 40px;
             cursor: pointer;
         }
-        select.futuristic-input option {
-            background: #1a1a2e;
-            color: #ffffff;
-        }
+        select.futuristic-input option { background: #1a1a2e; color: #ffffff; }
         .login-btn {
             width: 100%; padding: 14px; margin-top: 10px; background: linear-gradient(135deg, var(--green), #007a3f);
             border: none; border-radius: 8px; font-family: 'Orbitron'; font-size: 1rem; font-weight: 700;
@@ -118,7 +112,7 @@
         .item-arrow { font-size: 1.2rem; color: rgba(255,255,255,0.25); }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; background: rgba(0,0,0,0.8); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-box { background: var(--card-bg); border: 1.5px solid rgba(0,168,89,0.3); border-radius: 20px; padding: 30px 25px; width: 90%; max-width: 550px; position: relative; max-height: 80vh; overflow-y: auto; }
+        .modal-box { background: var(--card-bg); border: 1.5px solid rgba(0,168,89,0.3); border-radius: 20px; padding: 30px 25px; width: 90%; max-width: 850px; position: relative; max-height: 80vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .modal-title { font-family: 'Orbitron'; font-size: 1.2rem; color: var(--white); }
         .modal-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(206,43,55,0.2); border: 1px solid rgba(206,43,55,0.5); color: var(--red); font-size: 1.2rem; cursor: pointer; }
@@ -128,15 +122,17 @@
         .bairros-table th, .bairros-table td { padding: 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); color: #d0d8e0; font-size: 0.8rem; }
         .bairros-table th { color: var(--green); font-size: 0.7rem; letter-spacing: 2px; }
         .bairros-table button { background: rgba(206,43,55,0.2); border: 1px solid rgba(206,43,55,0.5); color: var(--red); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
-        textarea.futuristic-input { height: 100px; resize: vertical; }
+        textarea.futuristic-input { height: 150px; resize: vertical; font-size: 0.75rem; line-height: 1.6; }
         .admin-section { display: none; }
         .confirm-box { text-align: center; max-width: 350px; padding: 30px; }
         .confirm-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 20px; }
         .confirm-btn { padding: 12px 24px; border-radius: 8px; font-family: 'Orbitron'; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; }
         .confirm-btn.yes { background: var(--red); color: white; }
         .confirm-btn.no { background: #333; color: white; }
-        .comandas-list { max-height: 200px; overflow-y: auto; margin-top: 10px; }
-        .comanda-item { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.8rem; }
+        .comandas-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .comandas-table th, .comandas-table td { padding: 6px 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); color: #d0d8e0; font-size: 0.7rem; }
+        .comandas-table th { color: var(--green); font-size: 0.65rem; letter-spacing: 1px; }
+        .comandas-table-container { max-height: 300px; overflow-y: auto; margin-top: 10px; }
         .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .calendar-nav button { background: rgba(0,168,89,0.15); border: 1px solid rgba(0,168,89,0.4); color: var(--white); width: 36px; height: 36px; border-radius: 8px; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; }
         .calendar-nav button:hover { background: rgba(0,168,89,0.3); box-shadow: 0 0 12px var(--green); }
@@ -162,6 +158,22 @@
         .total-field { background: rgba(0,168,89,0.1); border: 2px solid rgba(0,168,89,0.5); border-radius: 10px; padding: 16px; margin-top: 8px; }
         .total-field label { color: #00a859 !important; font-family: 'Orbitron'; font-size: 0.85rem; letter-spacing: 3px; margin-bottom: 8px; display: block; text-align: center; text-shadow: 0 0 10px rgba(0,168,89,0.4); }
         .total-field .total-value { font-family: 'Orbitron'; font-size: 1.8rem; font-weight: 700; color: #00ff88; text-align: center; text-shadow: 0 0 15px rgba(0,255,136,0.6), 0 0 30px rgba(0,168,89,0.3); letter-spacing: 2px; }
+        .badge-grupo { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; letter-spacing: 1px; }
+        .badge-regalo { background: rgba(255, 215, 0, 0.2); color: #ffd700; border: 1px solid #ffd700; }
+        .badge-boutique { background: rgba(255, 105, 180, 0.2); color: #ff69b4; border: 1px solid #ff69b4; }
+        .badge-sushi { background: rgba(255, 99, 71, 0.2); color: #ff6347; border: 1px solid #ff6347; }
+        .import-format-info {
+            background: rgba(0,168,89,0.05);
+            border: 1px solid rgba(0,168,89,0.2);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            font-family: 'Share Tech Mono';
+            font-size: 0.65rem;
+            color: rgba(180,200,220,0.6);
+            line-height: 1.5;
+        }
+        .import-format-info strong { color: var(--green); }
         @media (max-width: 600px) { .main-container { padding: 25px 18px; } .main-title { font-size: 1.3rem; } }
     </style>
 </head>
@@ -273,18 +285,49 @@
             </div>
         </div>
     </div>
+    <!-- Modal Comandas (IMPORTAÇÃO TXT) -->
     <div id="comandasModal" class="modal-overlay">
-        <div class="modal-box" style="max-width:600px;">
+        <div class="modal-box" style="max-width:850px;">
             <div class="modal-header"><span class="modal-title">📋 COMANDAS</span><button class="modal-close" id="closeComandasModal">✕</button></div>
-            <div style="margin-bottom:15px;">
-                <textarea id="comandasText" class="futuristic-input" placeholder="Cole aqui o conteúdo do arquivo TXT (uma linha por comanda)"></textarea>
-                <button id="importComandasBtn" class="login-btn" style="margin-top:8px;">⬇️ IMPORTAR COMANDAS</button>
-                <div id="comandasMsg" style="font-family:'Share Tech Mono';font-size:0.7rem;color:rgba(180,200,220,0.7);text-align:center;min-height:20px;margin-top:5px;"></div>
+            
+            <!-- Área de importação -->
+            <div style="border: 1px solid rgba(0,168,89,0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                <div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);margin-bottom:8px;letter-spacing:2px;">📥 IMPORTAR COMANDAS (TXT)</div>
+                <div class="import-format-info">
+                    <strong>Formato (separado por TAB ou ponto-e-vírgula ;):</strong><br>
+                    Data &nbsp;|&nbsp; Motoboy &nbsp;|&nbsp; Número &nbsp;|&nbsp; Bairro &nbsp;|&nbsp; Horário &nbsp;|&nbsp; Grupo &nbsp;|&nbsp; Valor<br>
+                    <strong>Grupos válidos:</strong> Regalo, Boutique, Sushi<br>
+                    <strong>Exemplo:</strong> 04/07/2026 &nbsp;;&nbsp; João &nbsp;;&nbsp; 0001 &nbsp;;&nbsp; Centro &nbsp;;&nbsp; 14:30 &nbsp;;&nbsp; Regalo &nbsp;;&nbsp; 150.00
+                </div>
+                <textarea id="comandasImportText" class="futuristic-input" placeholder="Cole aqui os dados das comandas...&#10;04/07/2026;João;0001;Centro;14:30;Regalo;150.00&#10;04/07/2026;Maria;0002;Barra;15:00;Boutique;200.00"></textarea>
+                <button id="importComandasTxtBtn" class="login-btn" style="margin-top:8px;">⬇️ IMPORTAR DO TEXTO</button>
+                <div id="comandasImportMsg" style="font-family:'Share Tech Mono';font-size:0.7rem;color:#ffffff;text-align:center;min-height:20px;margin-top:5px;"></div>
             </div>
+
+            <!-- Tabela de comandas -->
             <div style="border-top:1px solid rgba(0,168,89,0.3); padding-top:15px;">
-                <div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);margin-bottom:8px;">📌 COMANDAS IMPORTADAS</div>
-                <div id="comandasLista" class="comandas-list" style="max-height:250px; overflow-y:auto;"></div>
-                <button id="clearComandasBtn" class="login-btn danger-btn" style="margin-top:10px;">🗑️ LIMPAR COMANDAS</button>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);">📌 COMANDAS REGISTRADAS</div>
+                    <div style="font-family:'Share Tech Mono';font-size:0.7rem;color:rgba(180,200,220,0.7);">Total: <span id="comandasTotalCount">0</span> | Soma: <span id="comandasSomaValores" style="color:#00ff88;">R$ 0,00</span></div>
+                </div>
+                <div class="comandas-table-container">
+                    <table class="comandas-table" id="comandasTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Motoboy</th>
+                                <th>Nº</th>
+                                <th>Bairro</th>
+                                <th>Horário</th>
+                                <th>Grupo</th>
+                                <th>Valor</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <button id="clearComandasBtn" class="login-btn danger-btn" style="margin-top:10px;">🗑️ LIMPAR TODAS</button>
             </div>
         </div>
     </div>
@@ -542,29 +585,145 @@
             document.getElementById('clearMsg').style.color = '#00a859';
             setTimeout(() => { document.getElementById('clearMsg').textContent = ''; }, 3000);
         }
-        function renderComandas() {
-            const lista = document.getElementById('comandasLista');
-            lista.innerHTML = comandasData.length === 0 ? '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhuma comanda importada</div>' : comandasData.map(c => `<div class="comanda-item">📄 ${typeof c === 'string' ? c : c.texto || JSON.stringify(c)}</div>`).join('');
+
+        // ========== COMANDAS (IMPORTAÇÃO TXT) ==========
+        const GRUPOS_VALIDOS = ['regalo', 'boutique', 'sushi'];
+
+        function getBadgeGrupo(grupo) {
+            if (!grupo) return '-';
+            const g = grupo.toLowerCase();
+            if (g === 'regalo') return '<span class="badge-grupo badge-regalo">Regalo</span>';
+            if (g === 'boutique') return '<span class="badge-grupo badge-boutique">Boutique</span>';
+            if (g === 'sushi') return '<span class="badge-grupo badge-sushi">Sushi</span>';
+            return grupo;
         }
-        function importarComandas() {
+
+        function parseLinhaComanda(linha) {
+            linha = linha.trim();
+            if (!linha) return null;
+            
+            // Tenta separar por TAB ou ponto-e-vírgula
+            let parts;
+            if (linha.includes('\t')) {
+                parts = linha.split('\t');
+            } else if (linha.includes(';')) {
+                parts = linha.split(';');
+            } else {
+                // Tenta separar por espaços múltiplos
+                parts = linha.split(/\s{2,}/);
+                if (parts.length < 7) return null;
+            }
+            
+            if (parts.length < 7) return null;
+            
+            const data = parts[0].trim();
+            const motoboy = parts[1].trim();
+            const numero = parts[2].trim();
+            const bairro = parts[3].trim();
+            const horario = parts[4].trim();
+            const grupo = parts[5].trim();
+            const valorStr = parts[6].trim().replace('R$', '').replace(/\./g, '').replace(',', '.');
+            const valor = parseFloat(valorStr);
+            
+            // Validações
+            if (!data || !motoboy || !numero || !bairro || !horario || !grupo || isNaN(valor)) return null;
+            if (!/^\d{4}$/.test(numero)) return null;
+            if (!GRUPOS_VALIDOS.includes(grupo.toLowerCase())) return null;
+            if (valor < 0) return null;
+            
+            return {
+                data: data,
+                motoboy: motoboy,
+                numero: numero,
+                bairro: bairro,
+                horario: horario,
+                grupo: grupo.charAt(0).toUpperCase() + grupo.slice(1).toLowerCase(),
+                valor: valor,
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        function importarComandasTxt() {
             if (!loggedUser || !loggedUser.isAdmin) return;
-            const text = document.getElementById('comandasText').value.trim();
-            const msg = document.getElementById('comandasMsg');
-            if (!text) { msg.textContent = '⚠️ Cole o conteúdo do arquivo.'; msg.style.color = '#ce2b37'; return; }
+            
+            const text = document.getElementById('comandasImportText').value.trim();
+            const msg = document.getElementById('comandasImportMsg');
+            
+            if (!text) {
+                msg.textContent = '⚠️ Cole os dados das comandas no formato indicado.';
+                msg.style.color = '#ce2b37';
+                return;
+            }
+            
             const lines = text.split('\n').filter(line => line.trim() !== '');
-            if (lines.length === 0) { msg.textContent = '⚠️ Nenhuma linha encontrada.'; msg.style.color = '#ce2b37'; return; }
-            const novasComandas = lines.map(line => ({ texto: line.trim(), data: new Date().toISOString() }));
-            const atualizadas = [...comandasData, ...novasComandas]; comandasRef.set(atualizadas);
-            document.getElementById('comandasText').value = '';
-            msg.textContent = `✅ ${lines.length} comanda(s) importada(s)!`; msg.style.color = '#00a859';
-            setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
+            let importadas = 0, erros = 0;
+            const novasComandas = [];
+            
+            for (let line of lines) {
+                const parsed = parseLinhaComanda(line);
+                if (parsed) {
+                    novasComandas.push(parsed);
+                    importadas++;
+                } else {
+                    erros++;
+                }
+            }
+            
+            if (importadas > 0) {
+                const atualizadas = [...comandasData, ...novasComandas];
+                comandasRef.set(atualizadas);
+                document.getElementById('comandasImportText').value = '';
+                msg.textContent = `✅ ${importadas} comanda(s) importada(s)!${erros > 0 ? ` (${erros} linha(s) com erro)` : ''}`;
+                msg.style.color = '#00a859';
+            } else {
+                msg.textContent = `⚠️ Nenhuma comanda válida encontrada (${erros} erros). Verifique o formato.`;
+                msg.style.color = '#ce2b37';
+            }
+            
+            setTimeout(() => { msg.style.color = '#ffffff'; msg.textContent = ''; }, 5000);
         }
+
+        function renderComandas() {
+            const tbody = document.querySelector('#comandasTable tbody');
+            const isAdmin = loggedUser && loggedUser.isAdmin;
+            
+            if (comandasData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:rgba(180,200,220,0.5);padding:15px;">Nenhuma comanda registrada</td></tr>';
+            } else {
+                tbody.innerHTML = comandasData.map((c, index) => `
+                    <tr>
+                        <td>${c.data || '-'}</td>
+                        <td>${c.motoboy || '-'}</td>
+                        <td>${c.numero || '-'}</td>
+                        <td>${c.bairro || '-'}</td>
+                        <td>${c.horario || '-'}</td>
+                        <td>${getBadgeGrupo(c.grupo)}</td>
+                        <td style="color:#00ff88;">${c.valor ? `R$ ${parseFloat(c.valor).toFixed(2)}` : '-'}</td>
+                        ${isAdmin ? `<td><button class="remove-comanda" data-index="${index}" style="background:rgba(206,43,55,0.2);border:1px solid rgba(206,43,55,0.5);color:var(--red);padding:2px 6px;border-radius:4px;cursor:pointer;font-size:0.6rem;">✕</button></td>` : '<td></td>'}
+                    </tr>
+                `).join('');
+                
+                if (isAdmin) {
+                    document.querySelectorAll('.remove-comanda').forEach(btn => {
+                        btn.onclick = (e) => {
+                            const index = parseInt(e.target.getAttribute('data-index'));
+                            comandasData.splice(index, 1);
+                            comandasRef.set(comandasData);
+                            renderComandas();
+                        };
+                    });
+                }
+            }
+            
+            document.getElementById('comandasTotalCount').textContent = comandasData.length;
+            const soma = comandasData.reduce((acc, c) => acc + (parseFloat(c.valor) || 0), 0);
+            document.getElementById('comandasSomaValores').textContent = `R$ ${soma.toFixed(2)}`;
+        }
+
         function limparComandas() {
             comandasRef.set([]);
-            document.getElementById('comandasMsg').textContent = '🗑️ Comandas limpas.';
-            document.getElementById('comandasMsg').style.color = '#ce2b37';
-            setTimeout(() => { document.getElementById('comandasMsg').textContent = ''; }, 2000);
         }
+
         function addEntregador(nome, senha) {
             if (entregadoresData.find(e => e.nome.toLowerCase() === nome.toLowerCase())) return { success: false, message: '⚠️ Entregador já cadastrado!' };
             if (nome.toLowerCase() === 'admin') return { success: false, message: '⚠️ Nome reservado!' };
@@ -655,6 +814,7 @@
             }
             calcularTotalAutomatico();
         }
+        // ========== EVENTOS ==========
         document.getElementById('loginBtn').addEventListener('click', attemptLogin);
         document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
         document.getElementById('usernameInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordInput').focus(); });
@@ -698,10 +858,12 @@
         document.getElementById('addBairroBtn').addEventListener('click', adicionarBairro);
         document.getElementById('importBairrosBtn').addEventListener('click', importarBairros);
         document.getElementById('closeBairrosModal').addEventListener('click', () => document.getElementById('bairrosModal').classList.remove('active'));
+        // Comandas
         document.getElementById('itemComandas').addEventListener('click', () => { document.getElementById('comandasModal').classList.add('active'); renderComandas(); });
-        document.getElementById('importComandasBtn').addEventListener('click', importarComandas);
+        document.getElementById('importComandasTxtBtn').addEventListener('click', importarComandasTxt);
         document.getElementById('clearComandasBtn').addEventListener('click', limparComandas);
         document.getElementById('closeComandasModal').addEventListener('click', () => document.getElementById('comandasModal').classList.remove('active'));
+        // Entregadores
         document.getElementById('itemCadastroEntregadores').addEventListener('click', () => { document.getElementById('entregadoresModal').classList.add('active'); renderEntregadoresLista(); document.getElementById('entregadorNome').focus(); });
         document.getElementById('addEntregadorBtn').addEventListener('click', realizarCadastroEntregador);
         document.getElementById('closeEntregadoresModal').addEventListener('click', () => document.getElementById('entregadoresModal').classList.remove('active'));
