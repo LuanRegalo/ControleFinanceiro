@@ -149,6 +149,16 @@
         .calendar-day:hover { background: rgba(0,168,89,0.15); border-color: rgba(0,168,89,0.5); color: #fff; }
         .calendar-day.selected { background: rgba(0,168,89,0.4); border-color: var(--green); color: #fff; }
         .calendar-day.empty { cursor: default; background: transparent; border: none; }
+        /* CALENDÁRIO SOMENTE VISUAL - NÃO CLICÁVEL */
+        .calendar-day.readonly {
+            cursor: default !important;
+            pointer-events: none !important;
+        }
+        .calendar-day.readonly:hover {
+            background: rgba(255,255,255,0.03) !important;
+            border-color: transparent !important;
+            color: rgba(255,255,255,0.7) !important;
+        }
         .calendar-info { font-family: 'Share Tech Mono'; font-size: 0.75rem; color: rgba(180,200,220,0.7); text-align: center; margin-top: 12px; }
         .connection-status {
             position: fixed; top: 10px; right: 10px; z-index: 300;
@@ -228,7 +238,6 @@
             color: #ffffff;
             font-weight: 600;
         }
-        /* NOVO: Campo de total automático */
         .total-field {
             background: rgba(0,168,89,0.1);
             border: 2px solid rgba(0,168,89,0.5);
@@ -310,7 +319,7 @@
                 <button id="nextMonth">▶</button>
             </div>
             <div class="calendar-grid" id="calendarDaysGrid"></div>
-            <div class="calendar-info" id="calendarInfo">Selecione os dias</div>
+            <div class="calendar-info" id="calendarInfo">Visualize os dias</div>
         </div>
     </div>
 
@@ -319,7 +328,6 @@
         <div class="modal-box">
             <div class="modal-header"><span class="modal-title">💲 DIÁRIAS, TAXAS E DESCONTOS</span><button class="modal-close" id="closeTaxesModal">✕</button></div>
             <div style="display:flex;flex-direction:column;gap:16px;">
-                <!-- Seção admin: busca de usuário -->
                 <div id="adminSearchSection" style="display:none;">
                     <div class="admin-divider">
                         <div class="admin-divider-label">🔍 BUSCAR USUÁRIO</div>
@@ -351,7 +359,6 @@
                     </div>
                 </div>
 
-                <!-- Campos de diárias, taxas e descontos -->
                 <div class="tax-field">
                     <label>🏨 DIÁRIAS</label>
                     <input type="number" id="diariasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01">
@@ -365,7 +372,6 @@
                     <input type="number" id="descontosInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01">
                 </div>
                 
-                <!-- NOVO: Campo de total automático -->
                 <div class="total-field">
                     <label>💰 TOTAL</label>
                     <div class="total-value" id="totalAutomatico">R$ 0,00</div>
@@ -560,7 +566,6 @@
             }
         }
 
-        // ========== NOVO: CÁLCULO DO TOTAL AUTOMÁTICO ==========
         function calcularTotalAutomatico() {
             const d = parseFloat(document.getElementById('diariasInput').value) || 0;
             const t = parseFloat(document.getElementById('taxasInput').value) || 0;
@@ -571,7 +576,6 @@
             if (totalEl) {
                 totalEl.textContent = `R$ ${total.toFixed(2)}`;
                 
-                // Muda a cor baseado no valor
                 if (total < 0) {
                     totalEl.style.color = '#ff4444';
                 } else if (total > 0) {
@@ -640,6 +644,7 @@
             }
         }
 
+        // ========== CALENDÁRIO (SOMENTE VISUALIZAÇÃO - NINGUÉM EDITA) ==========
         function renderCalendar() {
             const year = currentDate.getFullYear(), month = currentDate.getMonth();
             const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -648,41 +653,30 @@
             const daysInMonth = new Date(year, month+1, 0).getDate();
             const grid = document.getElementById('calendarDaysGrid');
             grid.innerHTML = '';
+            
             ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(d => {
                 const h = document.createElement('div');
                 h.className = 'calendar-day-header';
                 h.textContent = d;
                 grid.appendChild(h);
             });
-            for (let i=0; i<firstDay; i++) {
+            
+            for (let i = 0; i < firstDay; i++) {
                 const empty = document.createElement('div');
                 empty.className = 'calendar-day empty';
                 grid.appendChild(empty);
             }
-            for (let day=1; day<=daysInMonth; day++) {
+            
+            for (let day = 1; day <= daysInMonth; day++) {
                 const dayEl = document.createElement('div');
-                dayEl.className = 'calendar-day';
+                dayEl.className = 'calendar-day readonly';
                 dayEl.textContent = day;
                 const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                 if (selectedDays.has(key)) dayEl.classList.add('selected');
-                dayEl.addEventListener('click', () => {
-                    if (selectedDays.has(key)) {
-                        selectedDays.delete(key);
-                        dayEl.classList.remove('selected');
-                    } else {
-                        selectedDays.add(key);
-                        dayEl.classList.add('selected');
-                    }
-                    const diasObj = {};
-                    selectedDays.forEach(k => diasObj[k] = true);
-                    diasRodadosRef.set(diasObj);
-                    
-                    document.getElementById('diasRodadosInfo').textContent = selectedDays.size ? `${selectedDays.size} dias registrados` : '';
-                    document.getElementById('calendarInfo').textContent = `${selectedDays.size} dias selecionados`;
-                });
                 grid.appendChild(dayEl);
             }
-            document.getElementById('calendarInfo').textContent = `${selectedDays.size} dias selecionados`;
+            
+            document.getElementById('calendarInfo').textContent = `${selectedDays.size} dias registrados`;
         }
 
         function ordenarBairros() { bairrosData.sort((a, b) => a.taxa - b.taxa); }
@@ -1006,7 +1000,6 @@
         document.getElementById('confirmNo').addEventListener('click', fecharConfirmClear);
         document.getElementById('confirmModal').addEventListener('click', e => { if (e.target === document.getElementById('confirmModal')) fecharConfirmClear(); });
 
-        // NOVO: Eventos para calcular total automático
         document.getElementById('diariasInput').addEventListener('input', calcularTotalAutomatico);
         document.getElementById('taxasInput').addEventListener('input', calcularTotalAutomatico);
         document.getElementById('descontosInput').addEventListener('input', calcularTotalAutomatico);
