@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle Financeiro — Acesso Restrito (Demonstração)</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <style>
@@ -131,7 +130,6 @@
         .bairros-table button { background: rgba(206,43,55,0.2); border: 1px solid rgba(206,43,55,0.5); color: var(--red); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
         textarea.futuristic-input { height: 100px; resize: vertical; }
         .admin-section { display: none; }
-        .admin-section.visible { display: block; }
         .confirm-box { text-align: center; max-width: 350px; padding: 30px; }
         .confirm-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 20px; }
         .confirm-btn { padding: 12px 24px; border-radius: 8px; font-family: 'Orbitron'; font-weight: 700; cursor: pointer; border: none; text-transform: uppercase; }
@@ -145,19 +143,10 @@
         .calendar-month-year { font-family: 'Orbitron'; font-size: 1rem; font-weight: 600; color: var(--white); }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
         .calendar-day-header { font-family: 'Share Tech Mono'; font-size: 0.7rem; letter-spacing: 1px; color: var(--green); padding: 8px 0; }
-        .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 0.9rem; cursor: pointer; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.03); border: 1px solid transparent; transition: all 0.2s; }
-        .calendar-day:hover { background: rgba(0,168,89,0.15); border-color: rgba(0,168,89,0.5); color: #fff; }
+        .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 0.9rem; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.03); border: 1px solid transparent; }
         .calendar-day.selected { background: rgba(0,168,89,0.4); border-color: var(--green); color: #fff; }
-        .calendar-day.empty { cursor: default; background: transparent; border: none; }
-        .calendar-day.readonly {
-            cursor: default !important;
-            pointer-events: none !important;
-        }
-        .calendar-day.readonly:hover {
-            background: rgba(255,255,255,0.03) !important;
-            border-color: transparent !important;
-            color: rgba(255,255,255,0.7) !important;
-        }
+        .calendar-day.empty { background: transparent; border: none; }
+        .calendar-day.readonly { cursor: default !important; pointer-events: none !important; }
         .calendar-info { font-family: 'Share Tech Mono'; font-size: 0.75rem; color: rgba(180,200,220,0.7); text-align: center; margin-top: 12px; }
         .connection-status {
             position: fixed; top: 10px; right: 10px; z-index: 300;
@@ -168,56 +157,20 @@
         .status-dot { width: 8px; height: 8px; border-radius: 50%; }
         .status-dot.online { background: #00a859; box-shadow: 0 0 8px #00a859; }
         .status-dot.offline { background: #ce2b37; box-shadow: 0 0 8px #ce2b37; }
-        .futuristic-input.readonly {
-            opacity: 0.7;
-            cursor: not-allowed;
-            background: rgba(20,20,35,0.4);
-        }
-        .tax-field label {
-            color: #ffffff !important;
-            font-family: 'Share Tech Mono';
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            margin-bottom: 6px;
-            display: block;
-        }
-        .total-field {
-            background: rgba(0,168,89,0.1);
-            border: 2px solid rgba(0,168,89,0.5);
-            border-radius: 10px;
-            padding: 16px;
-            margin-top: 8px;
-        }
-        .total-field label {
-            color: #00a859 !important;
-            font-family: 'Orbitron';
-            font-size: 0.85rem;
-            letter-spacing: 3px;
-            margin-bottom: 8px;
-            display: block;
-            text-align: center;
-            text-shadow: 0 0 10px rgba(0,168,89,0.4);
-        }
-        .total-field .total-value {
-            font-family: 'Orbitron';
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #00ff88;
-            text-align: center;
-            text-shadow: 0 0 15px rgba(0,255,136,0.6), 0 0 30px rgba(0,168,89,0.3);
-            letter-spacing: 2px;
-        }
+        .futuristic-input.readonly { opacity: 0.7; cursor: not-allowed; background: rgba(20,20,35,0.4); }
+        .tax-field label { color: #ffffff !important; font-family: 'Share Tech Mono'; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 6px; display: block; }
+        .total-field { background: rgba(0,168,89,0.1); border: 2px solid rgba(0,168,89,0.5); border-radius: 10px; padding: 16px; margin-top: 8px; }
+        .total-field label { color: #00a859 !important; font-family: 'Orbitron'; font-size: 0.85rem; letter-spacing: 3px; margin-bottom: 8px; display: block; text-align: center; text-shadow: 0 0 10px rgba(0,168,89,0.4); }
+        .total-field .total-value { font-family: 'Orbitron'; font-size: 1.8rem; font-weight: 700; color: #00ff88; text-align: center; text-shadow: 0 0 15px rgba(0,255,136,0.6), 0 0 30px rgba(0,168,89,0.3); letter-spacing: 2px; }
         @media (max-width: 600px) { .main-container { padding: 25px 18px; } .main-title { font-size: 1.3rem; } }
     </style>
 </head>
 <body>
     <div class="grid-overlay"></div><div class="scanlines"></div><canvas id="particlesCanvas"></canvas>
-    
     <div class="connection-status" id="connectionStatus">
         <span class="status-dot online" id="statusDot"></span>
         <span style="color:#ccc;" id="statusText">Conectado</span>
     </div>
-
     <div id="loadingScreen" class="overlay-screen">
         <div class="overlay-box">
             <div class="loading-text">💰💲 CARREGANDO</div>
@@ -225,7 +178,6 @@
             <div class="loading-sub" id="loadingPercent">0%</div>
         </div>
     </div>
-
     <div id="loginScreen" class="overlay-screen hidden">
         <div class="overlay-box">
             <div class="login-title">🔐 ACESSO RESTRITO</div>
@@ -235,7 +187,6 @@
             <div id="loginError" class="error-msg"></div>
         </div>
     </div>
-
     <div id="mainContent" class="main-container">
         <div class="title-section" style="text-align:center; margin-bottom:35px;">
             <span class="title-badge">💰💲</span>
@@ -251,8 +202,6 @@
             <li class="list-item admin-only" id="itemCadastroEntregadores" style="display:none;"><div class="item-indicator">🧑‍💼</div><div class="item-content"><div class="item-title">Cadastro de Entregadores</div><div class="item-desc" id="entregadoresCount"></div></div><span class="item-arrow">▶</span></li>
         </ul>
     </div>
-
-    <!-- Modal Calendário -->
     <div id="calendarModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header"><span class="modal-title">📅 DIAS RODADOS</span><button class="modal-close" id="closeCalendarModal">✕</button></div>
@@ -265,13 +214,10 @@
             <div class="calendar-info" id="calendarInfo">Visualize os dias</div>
         </div>
     </div>
-
-    <!-- Modal Diárias, Taxas e Descontos -->
     <div id="taxesModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header"><span class="modal-title">💲 DIÁRIAS, TAXAS E DESCONTOS</span><button class="modal-close" id="closeTaxesModal">✕</button></div>
             <div style="display:flex;flex-direction:column;gap:16px;">
-                <!-- Seção admin: busca de usuário -->
                 <div id="adminSearchSection" style="display:none;">
                     <div style="border-top: 1px solid rgba(0,168,89,0.4); padding-top: 15px; margin-bottom: 15px;">
                         <div style="font-family: 'Orbitron'; font-size: 0.75rem; color: var(--green); letter-spacing: 2px; margin-bottom: 12px; text-align: center;">🔍 BUSCAR USUÁRIO</div>
@@ -280,32 +226,15 @@
                         </select>
                     </div>
                 </div>
-
-                <div class="tax-field">
-                    <label>🏨 DIÁRIAS</label>
-                    <input type="number" id="diariasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01">
-                </div>
-                <div class="tax-field">
-                    <label>📋 TAXAS</label>
-                    <input type="number" id="taxasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01">
-                </div>
-                <div class="tax-field">
-                    <label>🔻 DESCONTOS</label>
-                    <input type="number" id="descontosInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01">
-                </div>
-                
-                <div class="total-field">
-                    <label>💰 TOTAL</label>
-                    <div class="total-value" id="totalAutomatico">R$ 0,00</div>
-                </div>
-                
+                <div class="tax-field"><label>🏨 DIÁRIAS</label><input type="number" id="diariasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01"></div>
+                <div class="tax-field"><label>📋 TAXAS</label><input type="number" id="taxasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01"></div>
+                <div class="tax-field"><label>🔻 DESCONTOS</label><input type="number" id="descontosInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01"></div>
+                <div class="total-field"><label>💰 TOTAL</label><div class="total-value" id="totalAutomatico">R$ 0,00</div></div>
                 <button id="saveTaxesBtn" class="login-btn admin-only-action" style="display:none;">💾 SALVAR</button>
                 <div id="taxesInfo" style="font-family:'Share Tech Mono';font-size:0.75rem;color:#ffffff;text-align:center;"></div>
             </div>
         </div>
     </div>
-
-    <!-- Modal Tabela de Bairros -->
     <div id="bairrosModal" class="modal-overlay">
         <div class="modal-box" style="max-width:600px;">
             <div class="modal-header"><span class="modal-title">🏙️ TABELA DE BAIRROS</span><button class="modal-close" id="closeBairrosModal">✕</button></div>
@@ -335,8 +264,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal de Confirmação -->
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-box confirm-box">
             <div style="font-family:'Orbitron';color:var(--white);font-size:1rem;margin-bottom:20px;">⚠️ Tem certeza que deseja remover TODOS os bairros?</div>
@@ -346,8 +273,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal Comandas -->
     <div id="comandasModal" class="modal-overlay">
         <div class="modal-box" style="max-width:600px;">
             <div class="modal-header"><span class="modal-title">📋 COMANDAS</span><button class="modal-close" id="closeComandasModal">✕</button></div>
@@ -363,8 +288,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal Cadastro de Entregadores -->
     <div id="entregadoresModal" class="modal-overlay">
         <div class="modal-box" style="max-width:550px;">
             <div class="modal-header"><span class="modal-title">🧑‍💼 CADASTRO DE ENTREGADORES</span><button class="modal-close" id="closeEntregadoresModal">✕</button></div>
@@ -378,9 +301,7 @@
             </div>
         </div>
     </div>
-
     <script>
-        // ========== CONFIGURAÇÃO FIREBASE ==========
         const firebaseConfig = {
             apiKey: "AIzaSyCOpiVOqfBHxNTsyCWhIi4nXNev12ewsAc",
             authDomain: "controle-financeiro-85963.firebaseapp.com",
@@ -391,153 +312,98 @@
             appId: "1:498376157494:web:1f2cecbfa27147b1576b97",
             measurementId: "G-QXQ238B0QV"
         };
-
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-
         const bairrosRef = database.ref('bairros');
         const entregadoresRef = database.ref('entregadores');
         const comandasRef = database.ref('comandas');
         const diasRodadosRef = database.ref('diasRodados');
         const taxasConfigRef = database.ref('taxasConfig');
         const taxasPorUsuarioRef = database.ref('taxasPorUsuario');
-
         let bairrosData = [];
         let entregadoresData = [];
         let comandasData = [];
         let currentDate = new Date();
         let selectedDays = new Set();
-        let usuarioSelecionadoAtual = ''; // NOVO: guarda o usuário selecionado
-
+        let usuarioSelecionadoAtual = '';
         const statusDot = document.getElementById('statusDot');
         const statusText = document.getElementById('statusText');
-        
         database.ref('.info/connected').on('value', (snap) => {
-            if (snap.val() === true) {
-                statusDot.className = 'status-dot online';
-                statusText.textContent = 'Conectado';
-            } else {
-                statusDot.className = 'status-dot offline';
-                statusText.textContent = 'Offline';
-            }
+            if (snap.val() === true) { statusDot.className = 'status-dot online'; statusText.textContent = 'Conectado'; }
+            else { statusDot.className = 'status-dot offline'; statusText.textContent = 'Offline'; }
         });
-
         bairrosRef.on('value', (snapshot) => {
             bairrosData = snapshot.val() || [];
-            if (!Array.isArray(bairrosData)) {
-                bairrosData = Object.values(bairrosData);
-            }
-            renderBairrosTableIfOpen();
-            updateCounts();
+            if (!Array.isArray(bairrosData)) { bairrosData = Object.values(bairrosData); }
+            renderBairrosTableIfOpen(); updateCounts();
         });
-
         entregadoresRef.on('value', (snapshot) => {
             entregadoresData = snapshot.val() || [];
-            if (!Array.isArray(entregadoresData)) {
-                entregadoresData = Object.values(entregadoresData);
-            }
-            renderEntregadoresListaIfOpen();
-            updateCounts();
-            atualizarSelectUsuarios();
+            if (!Array.isArray(entregadoresData)) { entregadoresData = Object.values(entregadoresData); }
+            renderEntregadoresListaIfOpen(); updateCounts(); atualizarSelectUsuarios();
         });
-
         comandasRef.on('value', (snapshot) => {
             comandasData = snapshot.val() || [];
-            if (!Array.isArray(comandasData)) {
-                comandasData = Object.values(comandasData);
-            }
-            renderComandasIfOpen();
-            updateCounts();
+            if (!Array.isArray(comandasData)) { comandasData = Object.values(comandasData); }
+            renderComandasIfOpen(); updateCounts();
         });
-
         diasRodadosRef.on('value', (snapshot) => {
             const data = snapshot.val();
-            if (data) {
-                selectedDays = new Set(Object.keys(data).filter(k => data[k] === true));
-            } else {
-                selectedDays = new Set();
-            }
+            if (data) { selectedDays = new Set(Object.keys(data).filter(k => data[k] === true)); }
+            else { selectedDays = new Set(); }
             const infoEl = document.getElementById('diasRodadosInfo');
-            if (infoEl) {
-                infoEl.textContent = selectedDays.size ? `${selectedDays.size} dias registrados` : '';
-            }
+            if (infoEl) { infoEl.textContent = selectedDays.size ? `${selectedDays.size} dias registrados` : ''; }
         });
-
         taxasConfigRef.on('value', (snapshot) => {
-            // Só atualiza dos dados globais se não tiver usuário selecionado
             if (!usuarioSelecionadoAtual) {
                 const data = snapshot.val() || {};
                 document.getElementById('diariasInput').value = data.diarias || '';
                 document.getElementById('taxasInput').value = data.taxas || '';
                 document.getElementById('descontosInput').value = data.descontos || '';
-                updateTaxasInfo(data);
-                calcularTotalAutomatico();
+                updateTaxasInfo(data); calcularTotalAutomatico();
             }
         });
-
         function updateCounts() {
             const entCount = document.getElementById('entregadoresCount');
             const comCount = document.getElementById('comandasCount');
             if (entCount) entCount.textContent = entregadoresData.length ? `${entregadoresData.length} entregador(es)` : '';
             if (comCount) comCount.textContent = comandasData.length ? `${comandasData.length} comanda(s)` : '';
         }
-
         function updateTaxasInfo(data) {
             const d = parseFloat(data.diarias) || 0;
             const t = parseFloat(data.taxas) || 0;
             const desc = parseFloat(data.descontos) || 0;
             const infoEl = document.getElementById('diariasTaxasInfo');
-            if (infoEl) {
-                infoEl.textContent = d > 0 || t > 0 || desc > 0 ? `Total: R$ ${(d + t - desc).toFixed(2)}` : '';
-            }
+            if (infoEl) { infoEl.textContent = d > 0 || t > 0 || desc > 0 ? `Total: R$ ${(d + t - desc).toFixed(2)}` : ''; }
         }
-
         function calcularTotalAutomatico() {
             const d = parseFloat(document.getElementById('diariasInput').value) || 0;
             const t = parseFloat(document.getElementById('taxasInput').value) || 0;
             const desc = parseFloat(document.getElementById('descontosInput').value) || 0;
             const total = d + t - desc;
-            
             const totalEl = document.getElementById('totalAutomatico');
             if (totalEl) {
                 totalEl.textContent = `R$ ${total.toFixed(2)}`;
-                
-                if (total < 0) {
-                    totalEl.style.color = '#ff4444';
-                } else if (total > 0) {
-                    totalEl.style.color = '#00ff88';
-                } else {
-                    totalEl.style.color = '#ffffff';
-                }
+                if (total < 0) { totalEl.style.color = '#ff4444'; }
+                else if (total > 0) { totalEl.style.color = '#00ff88'; }
+                else { totalEl.style.color = '#ffffff'; }
             }
         }
-
         function atualizarSelectUsuarios() {
             const select = document.getElementById('usuarioSelect');
             if (!select) return;
-            
             const valorAtual = select.value;
             select.innerHTML = '<option value="">-- Selecione um entregador --</option>';
-            
             entregadoresData.forEach(ent => {
                 const option = document.createElement('option');
-                option.value = ent.nome;
-                option.textContent = ent.nome;
+                option.value = ent.nome; option.textContent = ent.nome;
                 select.appendChild(option);
             });
-            
-            // Mantém o valor se o usuário ainda existe
-            if (entregadoresData.some(e => e.nome === valorAtual)) {
-                select.value = valorAtual;
-            } else {
-                select.value = '';
-            }
+            if (entregadoresData.some(e => e.nome === valorAtual)) { select.value = valorAtual; }
+            else { select.value = ''; }
         }
-
-        // ========== NOVO: CARREGAR DADOS DO USUÁRIO NOS CAMPOS PRINCIPAIS ==========
         function carregarDadosUsuario(nomeUsuario) {
             if (!nomeUsuario) {
-                // Voltou para "Selecione" - carrega dados globais
                 usuarioSelecionadoAtual = '';
                 taxasConfigRef.once('value').then((snapshot) => {
                     const data = snapshot.val() || {};
@@ -549,41 +415,20 @@
                 });
                 return;
             }
-            
             usuarioSelecionadoAtual = nomeUsuario;
-            
             taxasPorUsuarioRef.child(nomeUsuario).once('value').then((snapshot) => {
                 const data = snapshot.val() || { diarias: 0, taxas: 0, descontos: 0 };
-                
                 document.getElementById('diariasInput').value = data.diarias || 0;
                 document.getElementById('taxasInput').value = data.taxas || 0;
                 document.getElementById('descontosInput').value = data.descontos || 0;
-                
                 calcularTotalAutomatico();
-                
                 document.getElementById('taxesInfo').textContent = `👤 Visualizando: ${nomeUsuario}`;
                 document.getElementById('taxesInfo').style.color = '#00a859';
             });
         }
-
-        function renderBairrosTableIfOpen() {
-            if (document.getElementById('bairrosModal').classList.contains('active')) {
-                renderBairrosTable();
-            }
-        }
-
-        function renderEntregadoresListaIfOpen() {
-            if (document.getElementById('entregadoresModal').classList.contains('active')) {
-                renderEntregadoresLista();
-            }
-        }
-
-        function renderComandasIfOpen() {
-            if (document.getElementById('comandasModal').classList.contains('active')) {
-                renderComandas();
-            }
-        }
-
+        function renderBairrosTableIfOpen() { if (document.getElementById('bairrosModal').classList.contains('active')) { renderBairrosTable(); } }
+        function renderEntregadoresListaIfOpen() { if (document.getElementById('entregadoresModal').classList.contains('active')) { renderEntregadoresLista(); } }
+        function renderComandasIfOpen() { if (document.getElementById('comandasModal').classList.contains('active')) { renderComandas(); } }
         function renderCalendar() {
             const year = currentDate.getFullYear(), month = currentDate.getMonth();
             const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -592,69 +437,46 @@
             const daysInMonth = new Date(year, month+1, 0).getDate();
             const grid = document.getElementById('calendarDaysGrid');
             grid.innerHTML = '';
-            
             ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(d => {
-                const h = document.createElement('div');
-                h.className = 'calendar-day-header';
-                h.textContent = d;
-                grid.appendChild(h);
+                const h = document.createElement('div'); h.className = 'calendar-day-header'; h.textContent = d; grid.appendChild(h);
             });
-            
             for (let i = 0; i < firstDay; i++) {
-                const empty = document.createElement('div');
-                empty.className = 'calendar-day empty';
-                grid.appendChild(empty);
+                const empty = document.createElement('div'); empty.className = 'calendar-day empty'; grid.appendChild(empty);
             }
-            
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayEl = document.createElement('div');
-                dayEl.className = 'calendar-day readonly';
-                dayEl.textContent = day;
+                dayEl.className = 'calendar-day readonly'; dayEl.textContent = day;
                 const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                 if (selectedDays.has(key)) dayEl.classList.add('selected');
                 grid.appendChild(dayEl);
             }
-            
             document.getElementById('calendarInfo').textContent = `${selectedDays.size} dias registrados`;
         }
-
         function ordenarBairros() { bairrosData.sort((a, b) => a.taxa - b.taxa); }
-        
         function renderBairrosTable() {
             ordenarBairros();
             const tbody = document.querySelector('#bairrosTable tbody');
             const isAdmin = loggedUser && loggedUser.isAdmin;
             document.getElementById('thAcoes').style.display = isAdmin ? 'table-cell' : 'none';
             tbody.innerHTML = bairrosData.map((b, index) => `
-                <tr>
-                    <td>${b.nome}</td>
-                    <td>${b.taxa.toFixed(2)}</td>
-                    ${isAdmin ? `<td><button class="remove-bairro" data-index="${index}">🗑️</button></td>` : ''}
-                </tr>
-            `).join('');
+                <tr><td>${b.nome}</td><td>${b.taxa.toFixed(2)}</td>
+                ${isAdmin ? `<td><button class="remove-bairro" data-index="${index}">🗑️</button></td>` : ''}</tr>`).join('');
             document.getElementById('bairrosCount').textContent = bairrosData.length;
-            
             if (isAdmin) {
                 document.querySelectorAll('.remove-bairro').forEach(btn => {
                     btn.onclick = (e) => {
                         const index = parseInt(e.target.getAttribute('data-index'));
-                        bairrosData.splice(index, 1);
-                        saveBairros(bairrosData);
-                        renderBairrosTable();
+                        bairrosData.splice(index, 1); saveBairros(bairrosData); renderBairrosTable();
                     };
                 });
             }
-            
             document.getElementById('adminImportSection').style.display = isAdmin ? 'block' : 'none';
             document.getElementById('adminAddSection').style.display = isAdmin ? 'block' : 'none';
             document.getElementById('adminClearSection').style.display = isAdmin ? 'block' : 'none';
         }
-
         function saveBairros(arr) { bairrosRef.set(arr); }
-
         function parseLinhaBairro(linha) {
-            linha = linha.trim();
-            if (!linha) return null;
+            linha = linha.trim(); if (!linha) return null;
             let parts = linha.split(';');
             if (parts.length >= 2) {
                 const nome = parts[0].trim();
@@ -673,14 +495,10 @@
             if (tokens.length >= 2) {
                 const ultimo = tokens[tokens.length-1].replace('R$', '').replace(',', '.');
                 const valor = parseFloat(ultimo);
-                if (!isNaN(valor) && valor >= 0) {
-                    const nome = tokens.slice(0, -1).join(' ');
-                    return { nome, taxa: valor };
-                }
+                if (!isNaN(valor) && valor >= 0) { const nome = tokens.slice(0, -1).join(' '); return { nome, taxa: valor }; }
             }
             return null;
         }
-
         function importarBairros() {
             if (!loggedUser || !loggedUser.isAdmin) return;
             const text = document.getElementById('importBairrosText').value.trim();
@@ -693,22 +511,15 @@
                 const parsed = parseLinhaBairro(line);
                 if (!parsed) { erros++; continue; }
                 if (bairrosData.some(b => b.nome.toLowerCase() === parsed.nome.toLowerCase())) { erros++; continue; }
-                novosBairros.push(parsed);
-                novos++;
+                novosBairros.push(parsed); novos++;
             }
             if (novos > 0) {
-                const atualizados = [...bairrosData, ...novosBairros];
-                saveBairros(atualizados);
-                msg.textContent = `✅ ${novos} bairro(s) importado(s)!`;
-                msg.style.color = '#00a859';
+                const atualizados = [...bairrosData, ...novosBairros]; saveBairros(atualizados);
+                msg.textContent = `✅ ${novos} bairro(s) importado(s)!`; msg.style.color = '#00a859';
                 document.getElementById('importBairrosText').value = '';
-            } else {
-                msg.textContent = `⚠️ Nenhum bairro novo (${erros} erros/duplicados).`;
-                msg.style.color = '#ce2b37';
-            }
+            } else { msg.textContent = `⚠️ Nenhum bairro novo (${erros} erros/duplicados).`; msg.style.color = '#ce2b37'; }
             setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 4000);
         }
-
         function adicionarBairro() {
             if (!loggedUser || !loggedUser.isAdmin) return;
             const nome = document.getElementById('novoBairroNome').value.trim();
@@ -717,31 +528,24 @@
             if (!nome || isNaN(taxa)) { msg.textContent = '⚠️ Preencha todos os campos.'; msg.style.color = '#ce2b37'; return; }
             if (taxa < 0) { msg.textContent = '⚠️ Valor não pode ser negativo.'; msg.style.color = '#ce2b37'; return; }
             if (bairrosData.some(b => b.nome.toLowerCase() === nome.toLowerCase())) { msg.textContent = '⚠️ Bairro já existe.'; msg.style.color = '#ce2b37'; return; }
-            bairrosData.push({ nome, taxa });
-            saveBairros(bairrosData);
+            bairrosData.push({ nome, taxa }); saveBairros(bairrosData);
             document.getElementById('novoBairroNome').value = '';
             document.getElementById('novoBairroTaxa').value = '';
             msg.textContent = '✅ Bairro adicionado!'; msg.style.color = '#00a859';
             setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
         }
-
         function abrirConfirmClear() { document.getElementById('confirmModal').classList.add('active'); }
         function fecharConfirmClear() { document.getElementById('confirmModal').classList.remove('active'); }
         function executarLimpeza() {
-            saveBairros([]);
-            fecharConfirmClear();
+            saveBairros([]); fecharConfirmClear();
             document.getElementById('clearMsg').textContent = '✅ Todos os bairros foram removidos.';
             document.getElementById('clearMsg').style.color = '#00a859';
             setTimeout(() => { document.getElementById('clearMsg').textContent = ''; }, 3000);
         }
-
         function renderComandas() {
             const lista = document.getElementById('comandasLista');
-            lista.innerHTML = comandasData.length === 0 ? 
-                '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhuma comanda importada</div>' : 
-                comandasData.map(c => `<div class="comanda-item">📄 ${typeof c === 'string' ? c : c.texto || JSON.stringify(c)}</div>`).join('');
+            lista.innerHTML = comandasData.length === 0 ? '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhuma comanda importada</div>' : comandasData.map(c => `<div class="comanda-item">📄 ${typeof c === 'string' ? c : c.texto || JSON.stringify(c)}</div>`).join('');
         }
-
         function importarComandas() {
             if (!loggedUser || !loggedUser.isAdmin) return;
             const text = document.getElementById('comandasText').value.trim();
@@ -750,46 +554,29 @@
             const lines = text.split('\n').filter(line => line.trim() !== '');
             if (lines.length === 0) { msg.textContent = '⚠️ Nenhuma linha encontrada.'; msg.style.color = '#ce2b37'; return; }
             const novasComandas = lines.map(line => ({ texto: line.trim(), data: new Date().toISOString() }));
-            const atualizadas = [...comandasData, ...novasComandas];
-            comandasRef.set(atualizadas);
+            const atualizadas = [...comandasData, ...novasComandas]; comandasRef.set(atualizadas);
             document.getElementById('comandasText').value = '';
-            msg.textContent = `✅ ${lines.length} comanda(s) importada(s)!`;
-            msg.style.color = '#00a859';
+            msg.textContent = `✅ ${lines.length} comanda(s) importada(s)!`; msg.style.color = '#00a859';
             setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
         }
-
         function limparComandas() {
             comandasRef.set([]);
             document.getElementById('comandasMsg').textContent = '🗑️ Comandas limpas.';
             document.getElementById('comandasMsg').style.color = '#ce2b37';
             setTimeout(() => { document.getElementById('comandasMsg').textContent = ''; }, 2000);
         }
-
         function addEntregador(nome, senha) {
-            if (entregadoresData.find(e => e.nome.toLowerCase() === nome.toLowerCase())) 
-                return { success: false, message: '⚠️ Entregador já cadastrado!' };
-            if (nome.toLowerCase() === 'admin') 
-                return { success: false, message: '⚠️ Nome reservado!' };
-            entregadoresData.push({ nome, senha });
-            entregadoresRef.set(entregadoresData);
+            if (entregadoresData.find(e => e.nome.toLowerCase() === nome.toLowerCase())) return { success: false, message: '⚠️ Entregador já cadastrado!' };
+            if (nome.toLowerCase() === 'admin') return { success: false, message: '⚠️ Nome reservado!' };
+            entregadoresData.push({ nome, senha }); entregadoresRef.set(entregadoresData);
             return { success: true, message: '✅ Entregador cadastrado!' };
         }
-
-        function removeEntregador(nome) {
-            entregadoresData = entregadoresData.filter(e => e.nome !== nome);
-            entregadoresRef.set(entregadoresData);
-        }
-
+        function removeEntregador(nome) { entregadoresData = entregadoresData.filter(e => e.nome !== nome); entregadoresRef.set(entregadoresData); }
         function renderEntregadoresLista() {
             const lista = document.getElementById('entregadoresLista');
-            lista.innerHTML = entregadoresData.length === 0 ? 
-                '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhum entregador</div>' : 
-                entregadoresData.map(e => `<div class="entregador-item"><span>🧑 ${e.nome}</span><button class="remove-entregador" data-nome="${e.nome}">🗑️ REMOVER</button></div>`).join('');
-            document.querySelectorAll('.remove-entregador').forEach(b => b.addEventListener('click', (ev) => {
-                removeEntregador(ev.target.dataset.nome);
-            }));
+            lista.innerHTML = entregadoresData.length === 0 ? '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhum entregador</div>' : entregadoresData.map(e => `<div class="entregador-item"><span>🧑 ${e.nome}</span><button class="remove-entregador" data-nome="${e.nome}">🗑️ REMOVER</button></div>`).join('');
+            document.querySelectorAll('.remove-entregador').forEach(b => b.addEventListener('click', (ev) => { removeEntregador(ev.target.dataset.nome); }));
         }
-
         function realizarCadastroEntregador() {
             const nome = document.getElementById('entregadorNome').value.trim();
             const senha = document.getElementById('entregadorSenha').value;
@@ -798,34 +585,26 @@
             if (!nome || !senha || !confirma) { msg.textContent = '⚠️ Preencha todos os campos'; msg.style.color = '#ce2b37'; return; }
             if (senha !== confirma) { msg.textContent = '⚠️ Senhas não conferem'; msg.style.color = '#ce2b37'; return; }
             const result = addEntregador(nome, senha);
-            msg.textContent = result.message;
-            msg.style.color = result.success ? '#00a859' : '#ce2b37';
+            msg.textContent = result.message; msg.style.color = result.success ? '#00a859' : '#ce2b37';
             if (result.success) {
                 document.getElementById('entregadoresModal').classList.remove('active');
-                loggedUser = { username: nome, isAdmin: false };
-                entrarNoSistema();
+                loggedUser = { username: nome, isAdmin: false }; entrarNoSistema();
                 document.getElementById('entregadorNome').value = '';
                 document.getElementById('entregadorSenha').value = '';
                 document.getElementById('entregadorConfirmaSenha').value = '';
             }
             setTimeout(() => { msg.style.color = '#ffffff'; }, 3000);
         }
-
         const ADMIN_USER = "admin", ADMIN_PASS = "123";
         let loggedUser = null;
         let dadosCarregados = false;
-
         function verificarDadosCarregados() {
             Promise.all([
                 new Promise(resolve => entregadoresRef.once('value', () => resolve())),
                 new Promise(resolve => bairrosRef.once('value', () => resolve()))
-            ]).then(() => {
-                dadosCarregados = true;
-                document.getElementById('loginError').textContent = '';
-            });
+            ]).then(() => { dadosCarregados = true; document.getElementById('loginError').textContent = ''; });
         }
         verificarDadosCarregados();
-
         function attemptLogin() {
             const u = document.getElementById('usernameInput').value.trim();
             const p = document.getElementById('passwordInput').value.trim();
@@ -835,10 +614,8 @@
             const ent = entregadoresData.find(e => e.nome.toLowerCase() === u.toLowerCase() && e.senha === p);
             if (ent) { loggedUser = { username: ent.nome, isAdmin: false }; entrarNoSistema(); return; }
             document.getElementById('loginError').textContent = '⚠️ ACESSO NEGADO';
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('passwordInput').focus();
+            document.getElementById('passwordInput').value = ''; document.getElementById('passwordInput').focus();
         }
-
         function entrarNoSistema() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainContent').classList.add('visible');
@@ -851,16 +628,13 @@
             document.getElementById('passwordInput').value = '';
             document.getElementById('loginError').textContent = '';
         }
-
         function logout() {
-            loggedUser = null;
-            usuarioSelecionadoAtual = '';
+            loggedUser = null; usuarioSelecionadoAtual = '';
             document.getElementById('mainContent').classList.remove('visible');
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('usernameInput').focus();
             document.getElementById('loginError').textContent = '';
         }
-
         function configurarCamposTaxas() {
             const isAdmin = loggedUser && loggedUser.isAdmin;
             const diariasInput = document.getElementById('diariasInput');
@@ -869,34 +643,18 @@
             const saveBtn = document.getElementById('saveTaxesBtn');
             const adminSearchSection = document.getElementById('adminSearchSection');
             const usuarioSelect = document.getElementById('usuarioSelect');
-            
             if (isAdmin) {
-                diariasInput.readOnly = false;
-                taxasInput.readOnly = false;
-                descontosInput.readOnly = false;
-                diariasInput.classList.remove('readonly');
-                taxasInput.classList.remove('readonly');
-                descontosInput.classList.remove('readonly');
-                saveBtn.style.display = 'block';
-                adminSearchSection.style.display = 'block';
-                atualizarSelectUsuarios();
+                diariasInput.readOnly = false; taxasInput.readOnly = false; descontosInput.readOnly = false;
+                diariasInput.classList.remove('readonly'); taxasInput.classList.remove('readonly'); descontosInput.classList.remove('readonly');
+                saveBtn.style.display = 'block'; adminSearchSection.style.display = 'block'; atualizarSelectUsuarios();
             } else {
-                diariasInput.readOnly = true;
-                taxasInput.readOnly = true;
-                descontosInput.readOnly = true;
-                diariasInput.classList.add('readonly');
-                taxasInput.classList.add('readonly');
-                descontosInput.classList.add('readonly');
-                saveBtn.style.display = 'none';
-                adminSearchSection.style.display = 'none';
-                usuarioSelect.value = '';
-                usuarioSelecionadoAtual = '';
+                diariasInput.readOnly = true; taxasInput.readOnly = true; descontosInput.readOnly = true;
+                diariasInput.classList.add('readonly'); taxasInput.classList.add('readonly'); descontosInput.classList.add('readonly');
+                saveBtn.style.display = 'none'; adminSearchSection.style.display = 'none';
+                usuarioSelect.value = ''; usuarioSelecionadoAtual = '';
             }
-            
             calcularTotalAutomatico();
         }
-
-        // ========== EVENTOS ==========
         document.getElementById('loginBtn').addEventListener('click', attemptLogin);
         document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
         document.getElementById('usernameInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordInput').focus(); });
@@ -905,108 +663,59 @@
         document.getElementById('confirmYes').addEventListener('click', executarLimpeza);
         document.getElementById('confirmNo').addEventListener('click', fecharConfirmClear);
         document.getElementById('confirmModal').addEventListener('click', e => { if (e.target === document.getElementById('confirmModal')) fecharConfirmClear(); });
-
         document.getElementById('diariasInput').addEventListener('input', calcularTotalAutomatico);
         document.getElementById('taxasInput').addEventListener('input', calcularTotalAutomatico);
         document.getElementById('descontosInput').addEventListener('input', calcularTotalAutomatico);
-
-        document.getElementById('usuarioSelect').addEventListener('change', function() {
-            carregarDadosUsuario(this.value);
-        });
-
+        document.getElementById('usuarioSelect').addEventListener('change', function() { carregarDadosUsuario(this.value); });
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 const activeModal = document.querySelector('.modal-overlay.active');
-                if (activeModal) {
-                    activeModal.classList.remove('active');
-                    return;
-                }
-                if (loggedUser) {
-                    logout();
-                }
+                if (activeModal) { activeModal.classList.remove('active'); return; }
+                if (loggedUser) { logout(); }
             }
         });
-
-        document.getElementById('itemDiasRodados').addEventListener('click', () => {
-            document.getElementById('calendarModal').classList.add('active');
-            renderCalendar();
-        });
+        document.getElementById('itemDiasRodados').addEventListener('click', () => { document.getElementById('calendarModal').classList.add('active'); renderCalendar(); });
         document.getElementById('prevMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); });
         document.getElementById('nextMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); });
         document.getElementById('closeCalendarModal').addEventListener('click', () => document.getElementById('calendarModal').classList.remove('active'));
-
-        document.getElementById('itemDiariasTaxas').addEventListener('click', () => {
-            document.getElementById('taxesModal').classList.add('active');
-            configurarCamposTaxas();
-            document.getElementById('diariasInput').focus();
-        });
-        
+        document.getElementById('itemDiariasTaxas').addEventListener('click', () => { document.getElementById('taxesModal').classList.add('active'); configurarCamposTaxas(); document.getElementById('diariasInput').focus(); });
         document.getElementById('saveTaxesBtn').addEventListener('click', () => {
             if (!loggedUser || !loggedUser.isAdmin) return;
-            
             const d = parseFloat(document.getElementById('diariasInput').value) || 0;
             const t = parseFloat(document.getElementById('taxasInput').value) || 0;
             const desc = parseFloat(document.getElementById('descontosInput').value) || 0;
-            
-            // Se tem usuário selecionado, salva para ele
             if (usuarioSelecionadoAtual) {
                 taxasPorUsuarioRef.child(usuarioSelecionadoAtual).set({ diarias: d, taxas: t, descontos: desc });
                 document.getElementById('taxesInfo').textContent = `✅ Salvo para ${usuarioSelecionadoAtual}: Diárias ${d.toFixed(2)} + Taxas ${t.toFixed(2)} - Desc. ${desc.toFixed(2)}`;
             } else {
-                // Salva como global
                 taxasConfigRef.set({ diarias: d, taxas: t, descontos: desc });
                 document.getElementById('taxesInfo').textContent = `✅ Salvo: Diárias ${d.toFixed(2)} + Taxas ${t.toFixed(2)} - Desc. ${desc.toFixed(2)}`;
             }
-            
             document.getElementById('diariasTaxasInfo').textContent = `Total: R$ ${(d + t - desc).toFixed(2)}`;
         });
-        document.getElementById('closeTaxesModal').addEventListener('click', () => {
-            document.getElementById('taxesModal').classList.remove('active');
-            usuarioSelecionadoAtual = '';
-            document.getElementById('usuarioSelect').value = '';
-            document.getElementById('taxesInfo').textContent = '';
-        });
-
-        document.getElementById('itemTabelaBairros').addEventListener('click', () => {
-            document.getElementById('bairrosModal').classList.add('active');
-            renderBairrosTable();
-        });
+        document.getElementById('closeTaxesModal').addEventListener('click', () => { document.getElementById('taxesModal').classList.remove('active'); usuarioSelecionadoAtual = ''; document.getElementById('usuarioSelect').value = ''; document.getElementById('taxesInfo').textContent = ''; });
+        document.getElementById('itemTabelaBairros').addEventListener('click', () => { document.getElementById('bairrosModal').classList.add('active'); renderBairrosTable(); });
         document.getElementById('addBairroBtn').addEventListener('click', adicionarBairro);
         document.getElementById('importBairrosBtn').addEventListener('click', importarBairros);
         document.getElementById('closeBairrosModal').addEventListener('click', () => document.getElementById('bairrosModal').classList.remove('active'));
-
-        document.getElementById('itemComandas').addEventListener('click', () => {
-            document.getElementById('comandasModal').classList.add('active');
-            renderComandas();
-        });
+        document.getElementById('itemComandas').addEventListener('click', () => { document.getElementById('comandasModal').classList.add('active'); renderComandas(); });
         document.getElementById('importComandasBtn').addEventListener('click', importarComandas);
         document.getElementById('clearComandasBtn').addEventListener('click', limparComandas);
         document.getElementById('closeComandasModal').addEventListener('click', () => document.getElementById('comandasModal').classList.remove('active'));
-
-        document.getElementById('itemCadastroEntregadores').addEventListener('click', () => {
-            document.getElementById('entregadoresModal').classList.add('active');
-            renderEntregadoresLista();
-            document.getElementById('entregadorNome').focus();
-        });
+        document.getElementById('itemCadastroEntregadores').addEventListener('click', () => { document.getElementById('entregadoresModal').classList.add('active'); renderEntregadoresLista(); document.getElementById('entregadorNome').focus(); });
         document.getElementById('addEntregadorBtn').addEventListener('click', realizarCadastroEntregador);
         document.getElementById('closeEntregadoresModal').addEventListener('click', () => document.getElementById('entregadoresModal').classList.remove('active'));
-
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
-        });
-
+        document.querySelectorAll('.modal-overlay').forEach(overlay => { overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); }); });
         document.getElementById('novoBairroNome').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('novoBairroTaxa').focus(); });
         document.getElementById('novoBairroTaxa').addEventListener('keydown', e => { if (e.key === 'Enter') adicionarBairro(); });
         document.getElementById('entregadorNome').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('entregadorSenha').focus(); } });
         document.getElementById('entregadorSenha').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('entregadorConfirmaSenha').focus(); } });
         document.getElementById('entregadorConfirmaSenha').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); realizarCadastroEntregador(); } });
-
         let progress = 0;
         const loadingInterval = setInterval(() => {
             progress += Math.floor(Math.random()*8)+2;
             if (progress >= 100) {
-                progress = 100;
-                clearInterval(loadingInterval);
+                progress = 100; clearInterval(loadingInterval);
                 document.getElementById('loaderBar').style.width = '100%';
                 document.getElementById('loadingPercent').textContent = '100%';
                 setTimeout(() => {
@@ -1014,23 +723,15 @@
                     document.getElementById('loginScreen').classList.remove('hidden');
                     document.getElementById('usernameInput').focus();
                 }, 600);
-            } else {
-                document.getElementById('loaderBar').style.width = progress+'%';
-                document.getElementById('loadingPercent').textContent = progress+'%';
-            }
+            } else { document.getElementById('loaderBar').style.width = progress+'%'; document.getElementById('loadingPercent').textContent = progress+'%'; }
         }, 100);
-
         const canvas = document.getElementById('particlesCanvas'), ctx = canvas.getContext('2d');
         let particles = [];
         function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
         resize(); window.addEventListener('resize', resize);
         class Particle {
             constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height;
-                this.vx = (Math.random()-0.5)*0.4; this.vy = (Math.random()-0.5)*0.4;
-                this.size = Math.random()*1.8+0.4; this.opacity = Math.random()*0.6+0.2;
-            }
+            reset() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height; this.vx = (Math.random()-0.5)*0.4; this.vy = (Math.random()-0.5)*0.4; this.size = Math.random()*1.8+0.4; this.opacity = Math.random()*0.6+0.2; }
             update() { this.x += this.vx; this.y += this.vy; if (this.x<0) this.x=canvas.width; if (this.x>canvas.width) this.x=0; if (this.y<0) this.y=canvas.height; if (this.y>canvas.height) this.y=0; }
             draw() { ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fillStyle = `rgba(0,168,89,${this.opacity})`; ctx.fill(); }
         }
