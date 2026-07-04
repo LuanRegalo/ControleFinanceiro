@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle Financeiro — Acesso Restrito (Demonstração)</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <style>
         :root {
             --green: #00a859;
@@ -120,7 +123,6 @@
         .confirm-btn.no { background: #333; color: white; }
         .comandas-list { max-height: 200px; overflow-y: auto; margin-top: 10px; }
         .comanda-item { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.8rem; }
-        /* Estilos para o calendário */
         .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .calendar-nav button { background: rgba(0,168,89,0.15); border: 1px solid rgba(0,168,89,0.4); color: var(--white); width: 36px; height: 36px; border-radius: 8px; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; }
         .calendar-nav button:hover { background: rgba(0,168,89,0.3); box-shadow: 0 0 12px var(--green); }
@@ -132,11 +134,26 @@
         .calendar-day.selected { background: rgba(0,168,89,0.4); border-color: var(--green); color: #fff; }
         .calendar-day.empty { cursor: default; background: transparent; border: none; }
         .calendar-info { font-family: 'Share Tech Mono'; font-size: 0.75rem; color: rgba(180,200,220,0.7); text-align: center; margin-top: 12px; }
+        .connection-status {
+            position: fixed; top: 10px; right: 10px; z-index: 300;
+            font-family: 'Share Tech Mono'; font-size: 0.65rem; padding: 6px 12px;
+            border-radius: 20px; background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .status-dot.online { background: #00a859; box-shadow: 0 0 8px #00a859; }
+        .status-dot.offline { background: #ce2b37; box-shadow: 0 0 8px #ce2b37; }
         @media (max-width: 600px) { .main-container { padding: 25px 18px; } .main-title { font-size: 1.3rem; } }
     </style>
 </head>
 <body>
     <div class="grid-overlay"></div><div class="scanlines"></div><canvas id="particlesCanvas"></canvas>
+    
+    <!-- Indicador de conexão -->
+    <div class="connection-status" id="connectionStatus">
+        <span class="status-dot online" id="statusDot"></span>
+        <span style="color:#ccc;" id="statusText">Conectado</span>
+    </div>
 
     <div id="loadingScreen" class="overlay-screen">
         <div class="overlay-box">
@@ -172,7 +189,7 @@
         </ul>
     </div>
 
-    <!-- Modal Calendário (Dias Rodados) -->
+    <!-- Modal Calendário -->
     <div id="calendarModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header"><span class="modal-title">📅 DIAS RODADOS</span><button class="modal-close" id="closeCalendarModal">✕</button></div>
@@ -200,7 +217,7 @@
         </div>
     </div>
 
-    <!-- Modal Tabela de Bairros (ordenada por taxa) -->
+    <!-- Modal Tabela de Bairros -->
     <div id="bairrosModal" class="modal-overlay">
         <div class="modal-box" style="max-width:600px;">
             <div class="modal-header"><span class="modal-title">🏙️ TABELA DE BAIRROS</span><button class="modal-close" id="closeBairrosModal">✕</button></div>
@@ -242,7 +259,7 @@
         </div>
     </div>
 
-    <!-- Modal Comandas (admin only) -->
+    <!-- Modal Comandas -->
     <div id="comandasModal" class="modal-overlay">
         <div class="modal-box" style="max-width:600px;">
             <div class="modal-header"><span class="modal-title">📋 COMANDAS</span><button class="modal-close" id="closeComandasModal">✕</button></div>
@@ -275,26 +292,134 @@
     </div>
 
     <script>
-        // ========== DADOS EM MEMÓRIA ==========
-        let bairrosData = [
-            { nome: "Centro", taxa: 12.00 },
-            { nome: "Jardim Europa", taxa: 18.00 },
-            { nome: "Vila Mariana", taxa: 15.00 },
-            { nome: "Bela Vista", taxa: 14.00 },
-            { nome: "Moema", taxa: 20.00 },
-            { nome: "Itaim Bibi", taxa: 22.00 }
-        ];
+        // ========== CONFIGURAÇÃO FIREBASE ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOpiVOqfBHxNTsyCWhIi4nXNev12ewsAc",
+            authDomain: "controle-financeiro-85963.firebaseapp.com",
+            databaseURL: "https://controle-financeiro-85963-default-rtdb.firebaseio.com",
+            projectId: "controle-financeiro-85963",
+            storageBucket: "controle-financeiro-85963.firebasestorage.app",
+            messagingSenderId: "498376157494",
+            appId: "1:498376157494:web:1f2cecbfa27147b1576b97",
+            measurementId: "G-QXQ238B0QV"
+        };
+
+        // Inicializa Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // ========== REFERÊNCIAS DO BANCO ==========
+        const bairrosRef = database.ref('bairros');
+        const entregadoresRef = database.ref('entregadores');
+        const comandasRef = database.ref('comandas');
+        const diasRodadosRef = database.ref('diasRodados');
+        const taxasConfigRef = database.ref('taxasConfig');
+
+        // ========== VARIÁVEIS LOCAIS (cache) ==========
+        let bairrosData = [];
         let entregadoresData = [];
         let comandasData = [];
         let currentDate = new Date();
         let selectedDays = new Set();
 
-        function getBairros() { return bairrosData; }
-        function saveBairros(arr) { bairrosData = arr; }
-        function getEntregadores() { return entregadoresData; }
-        function saveEntregadores(arr) { entregadoresData = arr; }
-        function getComandas() { return comandasData; }
-        function saveComandas(arr) { comandasData = arr; }
+        // ========== MONITORAR CONEXÃO ==========
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        
+        database.ref('.info/connected').on('value', (snap) => {
+            if (snap.val() === true) {
+                statusDot.className = 'status-dot online';
+                statusText.textContent = 'Conectado';
+            } else {
+                statusDot.className = 'status-dot offline';
+                statusText.textContent = 'Offline';
+            }
+        });
+
+        // ========== CARREGAR DADOS DO BANCO EM TEMPO REAL ==========
+        bairrosRef.on('value', (snapshot) => {
+            bairrosData = snapshot.val() || [];
+            if (!Array.isArray(bairrosData)) {
+                bairrosData = Object.values(bairrosData);
+            }
+            renderBairrosTableIfOpen();
+            updateCounts();
+        });
+
+        entregadoresRef.on('value', (snapshot) => {
+            entregadoresData = snapshot.val() || [];
+            if (!Array.isArray(entregadoresData)) {
+                entregadoresData = Object.values(entregadoresData);
+            }
+            renderEntregadoresListaIfOpen();
+            updateCounts();
+        });
+
+        comandasRef.on('value', (snapshot) => {
+            comandasData = snapshot.val() || [];
+            if (!Array.isArray(comandasData)) {
+                comandasData = Object.values(comandasData);
+            }
+            renderComandasIfOpen();
+            updateCounts();
+        });
+
+        diasRodadosRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                selectedDays = new Set(Object.keys(data).filter(k => data[k] === true));
+            } else {
+                selectedDays = new Set();
+            }
+            const infoEl = document.getElementById('diasRodadosInfo');
+            if (infoEl) {
+                infoEl.textContent = selectedDays.size ? `${selectedDays.size} dias registrados` : '';
+            }
+        });
+
+        taxasConfigRef.on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            document.getElementById('diariasInput').value = data.diarias || '';
+            document.getElementById('taxasInput').value = data.taxas || '';
+            document.getElementById('descontosInput').value = data.descontos || '';
+            updateTaxasInfo(data);
+        });
+
+        // ========== FUNÇÕES AUXILIARES ==========
+        function updateCounts() {
+            const entCount = document.getElementById('entregadoresCount');
+            const comCount = document.getElementById('comandasCount');
+            if (entCount) entCount.textContent = entregadoresData.length ? `${entregadoresData.length} entregador(es)` : '';
+            if (comCount) comCount.textContent = comandasData.length ? `${comandasData.length} comanda(s)` : '';
+        }
+
+        function updateTaxasInfo(data) {
+            const d = parseFloat(data.diarias) || 0;
+            const t = parseFloat(data.taxas) || 0;
+            const desc = parseFloat(data.descontos) || 0;
+            const infoEl = document.getElementById('diariasTaxasInfo');
+            if (infoEl) {
+                infoEl.textContent = d > 0 || t > 0 || desc > 0 ? `Total: R$ ${(d + t - desc).toFixed(2)}` : '';
+            }
+        }
+
+        function renderBairrosTableIfOpen() {
+            if (document.getElementById('bairrosModal').classList.contains('active')) {
+                renderBairrosTable();
+            }
+        }
+
+        function renderEntregadoresListaIfOpen() {
+            if (document.getElementById('entregadoresModal').classList.contains('active')) {
+                renderEntregadoresLista();
+            }
+        }
+
+        function renderComandasIfOpen() {
+            if (document.getElementById('comandasModal').classList.contains('active')) {
+                renderComandas();
+            }
+        }
 
         // ========== CALENDÁRIO ==========
         function renderCalendar() {
@@ -323,8 +448,18 @@
                 const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                 if (selectedDays.has(key)) dayEl.classList.add('selected');
                 dayEl.addEventListener('click', () => {
-                    if (selectedDays.has(key)) { selectedDays.delete(key); dayEl.classList.remove('selected'); }
-                    else { selectedDays.add(key); dayEl.classList.add('selected'); }
+                    if (selectedDays.has(key)) {
+                        selectedDays.delete(key);
+                        dayEl.classList.remove('selected');
+                    } else {
+                        selectedDays.add(key);
+                        dayEl.classList.add('selected');
+                    }
+                    // Salvar no banco
+                    const diasObj = {};
+                    selectedDays.forEach(k => diasObj[k] = true);
+                    diasRodadosRef.set(diasObj);
+                    
                     document.getElementById('diasRodadosInfo').textContent = selectedDays.size ? `${selectedDays.size} dias registrados` : '';
                     document.getElementById('calendarInfo').textContent = `${selectedDays.size} dias selecionados`;
                 });
@@ -333,35 +468,41 @@
             document.getElementById('calendarInfo').textContent = `${selectedDays.size} dias selecionados`;
         }
 
+        // ========== BAIRROS ==========
         function ordenarBairros() { bairrosData.sort((a, b) => a.taxa - b.taxa); }
+        
         function renderBairrosTable() {
             ordenarBairros();
-            const bairros = getBairros();
             const tbody = document.querySelector('#bairrosTable tbody');
             const isAdmin = loggedUser && loggedUser.isAdmin;
             document.getElementById('thAcoes').style.display = isAdmin ? 'table-cell' : 'none';
-            tbody.innerHTML = bairros.map((b, index) => `
+            tbody.innerHTML = bairrosData.map((b, index) => `
                 <tr>
                     <td>${b.nome}</td>
                     <td>${b.taxa.toFixed(2)}</td>
                     ${isAdmin ? `<td><button class="remove-bairro" data-index="${index}">🗑️</button></td>` : ''}
                 </tr>
             `).join('');
-            document.getElementById('bairrosCount').textContent = bairros.length;
+            document.getElementById('bairrosCount').textContent = bairrosData.length;
+            
             if (isAdmin) {
                 document.querySelectorAll('.remove-bairro').forEach(btn => {
                     btn.onclick = (e) => {
                         const index = parseInt(e.target.getAttribute('data-index'));
-                        const bairrosAtuais = getBairros();
-                        bairrosAtuais.splice(index, 1);
-                        saveBairros(bairrosAtuais);
+                        bairrosData.splice(index, 1);
+                        saveBairros(bairrosData);
                         renderBairrosTable();
                     };
                 });
             }
+            
             document.getElementById('adminImportSection').style.display = isAdmin ? 'block' : 'none';
             document.getElementById('adminAddSection').style.display = isAdmin ? 'block' : 'none';
             document.getElementById('adminClearSection').style.display = isAdmin ? 'block' : 'none';
+        }
+
+        function saveBairros(arr) {
+            bairrosRef.set(arr);
         }
 
         function parseLinhaBairro(linha) {
@@ -399,20 +540,20 @@
             const msg = document.getElementById('importMsg');
             if (!text) { msg.textContent = '⚠️ Cole sua lista de bairros.'; msg.style.color = '#ce2b37'; return; }
             const lines = text.split('\n').filter(line => line.trim() !== '');
-            const bairrosExistentes = getBairros();
             let novos = 0, erros = 0;
             const novosBairros = [];
+            
             for (let line of lines) {
                 const parsed = parseLinhaBairro(line);
                 if (!parsed) { erros++; continue; }
-                if (bairrosExistentes.some(b => b.nome.toLowerCase() === parsed.nome.toLowerCase())) { erros++; continue; }
+                if (bairrosData.some(b => b.nome.toLowerCase() === parsed.nome.toLowerCase())) { erros++; continue; }
                 novosBairros.push(parsed);
                 novos++;
             }
+            
             if (novos > 0) {
-                const atualizados = [...bairrosExistentes, ...novosBairros];
+                const atualizados = [...bairrosData, ...novosBairros];
                 saveBairros(atualizados);
-                renderBairrosTable();
                 msg.textContent = `✅ ${novos} bairro(s) importado(s)!`;
                 msg.style.color = '#00a859';
                 document.getElementById('importBairrosText').value = '';
@@ -430,11 +571,10 @@
             const msg = document.getElementById('bairroMsg');
             if (!nome || isNaN(taxa)) { msg.textContent = '⚠️ Preencha todos os campos.'; msg.style.color = '#ce2b37'; return; }
             if (taxa < 0) { msg.textContent = '⚠️ Valor não pode ser negativo.'; msg.style.color = '#ce2b37'; return; }
-            const bairros = getBairros();
-            if (bairros.some(b => b.nome.toLowerCase() === nome.toLowerCase())) { msg.textContent = '⚠️ Bairro já existe.'; msg.style.color = '#ce2b37'; return; }
-            bairros.push({ nome, taxa });
-            saveBairros(bairros);
-            renderBairrosTable();
+            if (bairrosData.some(b => b.nome.toLowerCase() === nome.toLowerCase())) { msg.textContent = '⚠️ Bairro já existe.'; msg.style.color = '#ce2b37'; return; }
+            
+            bairrosData.push({ nome, taxa });
+            saveBairros(bairrosData);
             document.getElementById('novoBairroNome').value = '';
             document.getElementById('novoBairroTaxa').value = '';
             msg.textContent = '✅ Bairro adicionado!'; msg.style.color = '#00a859';
@@ -443,20 +583,21 @@
 
         function abrirConfirmClear() { document.getElementById('confirmModal').classList.add('active'); }
         function fecharConfirmClear() { document.getElementById('confirmModal').classList.remove('active'); }
+        
         function executarLimpeza() {
             saveBairros([]);
-            renderBairrosTable();
             fecharConfirmClear();
             document.getElementById('clearMsg').textContent = '✅ Todos os bairros foram removidos.';
             document.getElementById('clearMsg').style.color = '#00a859';
             setTimeout(() => { document.getElementById('clearMsg').textContent = ''; }, 3000);
         }
 
+        // ========== COMANDAS ==========
         function renderComandas() {
             const lista = document.getElementById('comandasLista');
-            const comandas = getComandas();
-            lista.innerHTML = comandas.length === 0 ? '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhuma comanda importada</div>' : comandas.map(c => `<div class="comanda-item">📄 ${c}</div>`).join('');
-            document.getElementById('comandasCount').textContent = comandas.length ? `${comandas.length} comanda(s)` : '';
+            lista.innerHTML = comandasData.length === 0 ? 
+                '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhuma comanda importada</div>' : 
+                comandasData.map(c => `<div class="comanda-item">📄 ${typeof c === 'string' ? c : c.texto || JSON.stringify(c)}</div>`).join('');
         }
 
         function importarComandas() {
@@ -466,10 +607,10 @@
             if (!text) { msg.textContent = '⚠️ Cole o conteúdo do arquivo.'; msg.style.color = '#ce2b37'; return; }
             const lines = text.split('\n').filter(line => line.trim() !== '');
             if (lines.length === 0) { msg.textContent = '⚠️ Nenhuma linha encontrada.'; msg.style.color = '#ce2b37'; return; }
-            const atuais = getComandas();
-            const novas = [...atuais, ...lines];
-            saveComandas(novas);
-            renderComandas();
+            
+            const novasComandas = lines.map(line => ({ texto: line.trim(), data: new Date().toISOString() }));
+            const atualizadas = [...comandasData, ...novasComandas];
+            comandasRef.set(atualizadas);
             document.getElementById('comandasText').value = '';
             msg.textContent = `✅ ${lines.length} comanda(s) importada(s)!`;
             msg.style.color = '#00a859';
@@ -477,42 +618,53 @@
         }
 
         function limparComandas() {
-            saveComandas([]);
-            renderComandas();
+            comandasRef.set([]);
             document.getElementById('comandasMsg').textContent = '🗑️ Comandas limpas.';
             document.getElementById('comandasMsg').style.color = '#ce2b37';
             setTimeout(() => { document.getElementById('comandasMsg').textContent = ''; }, 2000);
         }
 
+        // ========== ENTREGADORES ==========
         function addEntregador(nome, senha) {
-            const entregadores = getEntregadores();
-            if (entregadores.find(e => e.nome.toLowerCase() === nome.toLowerCase())) return { success: false, message: '⚠️ Entregador já cadastrado!' };
-            if (nome.toLowerCase() === 'admin') return { success: false, message: '⚠️ Nome reservado!' };
-            entregadores.push({ nome, senha });
-            saveEntregadores(entregadores);
+            if (entregadoresData.find(e => e.nome.toLowerCase() === nome.toLowerCase())) 
+                return { success: false, message: '⚠️ Entregador já cadastrado!' };
+            if (nome.toLowerCase() === 'admin') 
+                return { success: false, message: '⚠️ Nome reservado!' };
+            
+            entregadoresData.push({ nome, senha });
+            entregadoresRef.set(entregadoresData);
             return { success: true, message: '✅ Entregador cadastrado!' };
         }
-        function removeEntregador(nome) { saveEntregadores(getEntregadores().filter(e => e.nome !== nome)); }
+
+        function removeEntregador(nome) {
+            entregadoresData = entregadoresData.filter(e => e.nome !== nome);
+            entregadoresRef.set(entregadoresData);
+        }
+
         function renderEntregadoresLista() {
-            const arr = getEntregadores();
-            document.getElementById('entregadoresLista').innerHTML = arr.length === 0 ? '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhum entregador</div>' : arr.map(e => `<div class="entregador-item"><span>🧑 ${e.nome}</span><button class="remove-entregador" data-nome="${e.nome}">🗑️ REMOVER</button></div>`).join('');
+            const lista = document.getElementById('entregadoresLista');
+            lista.innerHTML = entregadoresData.length === 0 ? 
+                '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhum entregador</div>' : 
+                entregadoresData.map(e => `<div class="entregador-item"><span>🧑 ${e.nome}</span><button class="remove-entregador" data-nome="${e.nome}">🗑️ REMOVER</button></div>`).join('');
+            
             document.querySelectorAll('.remove-entregador').forEach(b => b.addEventListener('click', (ev) => {
                 removeEntregador(ev.target.dataset.nome);
-                renderEntregadoresLista();
-                document.getElementById('entregadoresCount').textContent = getEntregadores().length ? `${getEntregadores().length} entregador(es)` : '';
             }));
-            document.getElementById('entregadoresCount').textContent = arr.length ? `${arr.length} entregador(es)` : '';
         }
+
         function realizarCadastroEntregador() {
             const nome = document.getElementById('entregadorNome').value.trim();
             const senha = document.getElementById('entregadorSenha').value;
             const confirma = document.getElementById('entregadorConfirmaSenha').value;
             const msg = document.getElementById('entregadorMsg');
+            
             if (!nome || !senha || !confirma) { msg.textContent = '⚠️ Preencha todos os campos'; msg.style.color = '#ce2b37'; return; }
             if (senha !== confirma) { msg.textContent = '⚠️ Senhas não conferem'; msg.style.color = '#ce2b37'; return; }
+            
             const result = addEntregador(nome, senha);
             msg.textContent = result.message;
             msg.style.color = result.success ? '#00a859' : '#ce2b37';
+            
             if (result.success) {
                 document.getElementById('entregadoresModal').classList.remove('active');
                 loggedUser = { username: nome, isAdmin: false };
@@ -524,6 +676,7 @@
             setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
         }
 
+        // ========== AUTENTICAÇÃO ==========
         const ADMIN_USER = "admin", ADMIN_PASS = "123";
         let loggedUser = null;
 
@@ -531,13 +684,22 @@
             const u = document.getElementById('usernameInput').value.trim();
             const p = document.getElementById('passwordInput').value.trim();
             if (!u || !p) { document.getElementById('loginError').textContent = '⚠️ Preencha todos os campos'; return; }
-            if (u === ADMIN_USER && p === ADMIN_PASS) { loggedUser = { username: ADMIN_USER, isAdmin: true }; entrarNoSistema(); return; }
-            const ent = getEntregadores().find(e => e.nome.toLowerCase() === u.toLowerCase() && e.senha === p);
-            if (ent) { loggedUser = { username: ent.nome, isAdmin: false }; entrarNoSistema(); return; }
+            if (u === ADMIN_USER && p === ADMIN_PASS) { 
+                loggedUser = { username: ADMIN_USER, isAdmin: true }; 
+                entrarNoSistema(); 
+                return; 
+            }
+            const ent = entregadoresData.find(e => e.nome.toLowerCase() === u.toLowerCase() && e.senha === p);
+            if (ent) { 
+                loggedUser = { username: ent.nome, isAdmin: false }; 
+                entrarNoSistema(); 
+                return; 
+            }
             document.getElementById('loginError').textContent = '⚠️ ACESSO NEGADO';
             document.getElementById('passwordInput').value = '';
             document.getElementById('passwordInput').focus();
         }
+
         function entrarNoSistema() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainContent').classList.add('visible');
@@ -545,13 +707,11 @@
             const isAdmin = loggedUser.isAdmin;
             document.getElementById('itemCadastroEntregadores').style.display = isAdmin ? 'flex' : 'none';
             document.getElementById('itemComandas').style.display = isAdmin ? 'flex' : 'none';
-            if (isAdmin) {
-                document.getElementById('entregadoresCount').textContent = getEntregadores().length ? `${getEntregadores().length} entregador(es)` : '';
-                document.getElementById('comandasCount').textContent = getComandas().length ? `${getComandas().length} comanda(s)` : '';
-            }
+            updateCounts();
             document.getElementById('usernameInput').value = '';
             document.getElementById('passwordInput').value = '';
         }
+
         function logout() {
             loggedUser = null;
             document.getElementById('mainContent').classList.remove('visible');
@@ -569,6 +729,20 @@
         document.getElementById('confirmNo').addEventListener('click', fecharConfirmClear);
         document.getElementById('confirmModal').addEventListener('click', e => { if (e.target === document.getElementById('confirmModal')) fecharConfirmClear(); });
 
+        // ESC: fecha modais ou faz logout
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const activeModal = document.querySelector('.modal-overlay.active');
+                if (activeModal) {
+                    activeModal.classList.remove('active');
+                    return;
+                }
+                if (loggedUser) {
+                    logout();
+                }
+            }
+        });
+
         // Modal Dias Rodados
         document.getElementById('itemDiasRodados').addEventListener('click', () => {
             document.getElementById('calendarModal').classList.add('active');
@@ -584,10 +758,14 @@
             document.getElementById('diariasInput').focus();
         });
         document.getElementById('saveTaxesBtn').addEventListener('click', () => {
-            const d = parseFloat(document.getElementById('diariasInput').value)||0;
-            const t = parseFloat(document.getElementById('taxasInput').value)||0;
-            const desc = parseFloat(document.getElementById('descontosInput').value)||0;
-            document.getElementById('diariasTaxasInfo').textContent = `Total: R$ ${(d+t-desc).toFixed(2)}`;
+            const d = parseFloat(document.getElementById('diariasInput').value) || 0;
+            const t = parseFloat(document.getElementById('taxasInput').value) || 0;
+            const desc = parseFloat(document.getElementById('descontosInput').value) || 0;
+            
+            // Salvar no banco
+            taxasConfigRef.set({ diarias: d, taxas: t, descontos: desc });
+            
+            document.getElementById('diariasTaxasInfo').textContent = `Total: R$ ${(d + t - desc).toFixed(2)}`;
             document.getElementById('taxesInfo').textContent = `✅ Salvo: Diárias ${d.toFixed(2)} + Taxas ${t.toFixed(2)} - Desc. ${desc.toFixed(2)}`;
         });
         document.getElementById('closeTaxesModal').addEventListener('click', () => document.getElementById('taxesModal').classList.remove('active'));
