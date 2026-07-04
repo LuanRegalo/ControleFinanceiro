@@ -61,6 +61,22 @@
             border-radius: 8px; font-family: 'Share Tech Mono'; font-size: 1rem; color: var(--white); outline: none;
         }
         .futuristic-input:focus { border-color: var(--green); box-shadow: 0 0 15px rgba(0,168,89,0.4); }
+        .futuristic-input.readonly:focus {
+            border-color: rgba(0,168,89,0.3) !important;
+            box-shadow: none !important;
+        }
+        select.futuristic-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2300a859' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+        select.futuristic-input option {
+            background: #1a1a2e;
+            color: #ffffff;
+        }
         .login-btn {
             width: 100%; padding: 14px; margin-top: 10px; background: linear-gradient(135deg, var(--green), #007a3f);
             border: none; border-radius: 8px; font-family: 'Orbitron'; font-size: 1rem; font-weight: 700;
@@ -148,7 +164,6 @@
             cursor: not-allowed;
             background: rgba(20,20,35,0.4);
         }
-        /* NOVO: Labels das taxas em branco */
         .tax-field label {
             color: #ffffff !important;
             font-family: 'Share Tech Mono';
@@ -170,13 +185,82 @@
             font-size: 1rem;
             font-weight: 600;
         }
+        .admin-divider {
+            border-top: 1px solid rgba(0,168,89,0.4);
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        .admin-divider-label {
+            font-family: 'Orbitron';
+            font-size: 0.75rem;
+            color: var(--green);
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .usuario-info-card {
+            background: rgba(0,168,89,0.08);
+            border: 1px solid rgba(0,168,89,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            display: none;
+        }
+        .usuario-info-card.visible {
+            display: block;
+        }
+        .usuario-info-card .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: #ffffff;
+            font-family: 'Share Tech Mono';
+            font-size: 0.8rem;
+        }
+        .usuario-info-card .info-row:last-child {
+            border-bottom: none;
+        }
+        .usuario-info-card .info-label {
+            color: rgba(180,200,220,0.7);
+        }
+        .usuario-info-card .info-value {
+            color: #ffffff;
+            font-weight: 600;
+        }
+        /* NOVO: Campo de total automático */
+        .total-field {
+            background: rgba(0,168,89,0.1);
+            border: 2px solid rgba(0,168,89,0.5);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 8px;
+        }
+        .total-field label {
+            color: #00a859 !important;
+            font-family: 'Orbitron';
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            display: block;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0,168,89,0.4);
+        }
+        .total-field .total-value {
+            font-family: 'Orbitron';
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #00ff88;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(0,255,136,0.6), 0 0 30px rgba(0,168,89,0.3);
+            letter-spacing: 2px;
+        }
         @media (max-width: 600px) { .main-container { padding: 25px 18px; } .main-title { font-size: 1.3rem; } }
     </style>
 </head>
 <body>
     <div class="grid-overlay"></div><div class="scanlines"></div><canvas id="particlesCanvas"></canvas>
     
-    <!-- Indicador de conexão -->
     <div class="connection-status" id="connectionStatus">
         <span class="status-dot online" id="statusDot"></span>
         <span style="color:#ccc;" id="statusText">Conectado</span>
@@ -235,6 +319,39 @@
         <div class="modal-box">
             <div class="modal-header"><span class="modal-title">💲 DIÁRIAS, TAXAS E DESCONTOS</span><button class="modal-close" id="closeTaxesModal">✕</button></div>
             <div style="display:flex;flex-direction:column;gap:16px;">
+                <!-- Seção admin: busca de usuário -->
+                <div id="adminSearchSection" style="display:none;">
+                    <div class="admin-divider">
+                        <div class="admin-divider-label">🔍 BUSCAR USUÁRIO</div>
+                        <select id="usuarioSelect" class="futuristic-input">
+                            <option value="">-- Selecione um entregador --</option>
+                        </select>
+                    </div>
+                    <div id="usuarioInfoCard" class="usuario-info-card">
+                        <div class="info-row">
+                            <span class="info-label">👤 Usuário:</span>
+                            <span class="info-value" id="infoUsuarioNome">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🏨 Diárias:</span>
+                            <span class="info-value" id="infoUsuarioDiarias">R$ 0,00</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">📋 Taxas:</span>
+                            <span class="info-value" id="infoUsuarioTaxas">R$ 0,00</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">🔻 Descontos:</span>
+                            <span class="info-value" id="infoUsuarioDescontos">R$ 0,00</span>
+                        </div>
+                        <div class="info-row" style="border-top: 1px solid rgba(0,168,89,0.3); margin-top: 4px; padding-top: 8px;">
+                            <span class="info-label" style="color: #00a859;">💰 Total:</span>
+                            <span class="info-value" id="infoUsuarioTotal" style="color: #00a859;">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campos de diárias, taxas e descontos -->
                 <div class="tax-field">
                     <label>🏨 DIÁRIAS</label>
                     <input type="number" id="diariasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01">
@@ -247,6 +364,13 @@
                     <label>🔻 DESCONTOS</label>
                     <input type="number" id="descontosInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01">
                 </div>
+                
+                <!-- NOVO: Campo de total automático -->
+                <div class="total-field">
+                    <label>💰 TOTAL</label>
+                    <div class="total-value" id="totalAutomatico">R$ 0,00</div>
+                </div>
+                
                 <button id="saveTaxesBtn" class="login-btn admin-only-action" style="display:none;">💾 SALVAR</button>
                 <div id="taxesInfo" style="font-family:'Share Tech Mono';font-size:0.75rem;color:#ffffff;text-align:center;"></div>
             </div>
@@ -340,25 +464,22 @@
             measurementId: "G-QXQ238B0QV"
         };
 
-        // Inicializa Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // ========== REFERÊNCIAS DO BANCO ==========
         const bairrosRef = database.ref('bairros');
         const entregadoresRef = database.ref('entregadores');
         const comandasRef = database.ref('comandas');
         const diasRodadosRef = database.ref('diasRodados');
         const taxasConfigRef = database.ref('taxasConfig');
+        const taxasPorUsuarioRef = database.ref('taxasPorUsuario');
 
-        // ========== VARIÁVEIS LOCAIS (cache) ==========
         let bairrosData = [];
         let entregadoresData = [];
         let comandasData = [];
         let currentDate = new Date();
         let selectedDays = new Set();
 
-        // ========== MONITORAR CONEXÃO ==========
         const statusDot = document.getElementById('statusDot');
         const statusText = document.getElementById('statusText');
         
@@ -372,7 +493,6 @@
             }
         });
 
-        // ========== CARREGAR DADOS DO BANCO EM TEMPO REAL ==========
         bairrosRef.on('value', (snapshot) => {
             bairrosData = snapshot.val() || [];
             if (!Array.isArray(bairrosData)) {
@@ -389,6 +509,7 @@
             }
             renderEntregadoresListaIfOpen();
             updateCounts();
+            atualizarSelectUsuarios();
         });
 
         comandasRef.on('value', (snapshot) => {
@@ -419,9 +540,9 @@
             document.getElementById('taxasInput').value = data.taxas || '';
             document.getElementById('descontosInput').value = data.descontos || '';
             updateTaxasInfo(data);
+            calcularTotalAutomatico();
         });
 
-        // ========== FUNÇÕES AUXILIARES ==========
         function updateCounts() {
             const entCount = document.getElementById('entregadoresCount');
             const comCount = document.getElementById('comandasCount');
@@ -437,6 +558,68 @@
             if (infoEl) {
                 infoEl.textContent = d > 0 || t > 0 || desc > 0 ? `Total: R$ ${(d + t - desc).toFixed(2)}` : '';
             }
+        }
+
+        // ========== NOVO: CÁLCULO DO TOTAL AUTOMÁTICO ==========
+        function calcularTotalAutomatico() {
+            const d = parseFloat(document.getElementById('diariasInput').value) || 0;
+            const t = parseFloat(document.getElementById('taxasInput').value) || 0;
+            const desc = parseFloat(document.getElementById('descontosInput').value) || 0;
+            const total = d + t - desc;
+            
+            const totalEl = document.getElementById('totalAutomatico');
+            if (totalEl) {
+                totalEl.textContent = `R$ ${total.toFixed(2)}`;
+                
+                // Muda a cor baseado no valor
+                if (total < 0) {
+                    totalEl.style.color = '#ff4444';
+                } else if (total > 0) {
+                    totalEl.style.color = '#00ff88';
+                } else {
+                    totalEl.style.color = '#ffffff';
+                }
+            }
+        }
+
+        function atualizarSelectUsuarios() {
+            const select = document.getElementById('usuarioSelect');
+            if (!select) return;
+            
+            const valorAtual = select.value;
+            select.innerHTML = '<option value="">-- Selecione um entregador --</option>';
+            
+            entregadoresData.forEach(ent => {
+                const option = document.createElement('option');
+                option.value = ent.nome;
+                option.textContent = ent.nome;
+                select.appendChild(option);
+            });
+            
+            select.value = valorAtual;
+        }
+
+        function carregarDadosUsuario(nomeUsuario) {
+            const card = document.getElementById('usuarioInfoCard');
+            
+            if (!nomeUsuario) {
+                card.classList.remove('visible');
+                return;
+            }
+            
+            taxasPorUsuarioRef.child(nomeUsuario).once('value').then((snapshot) => {
+                const data = snapshot.val() || { diarias: 0, taxas: 0, descontos: 0 };
+                
+                document.getElementById('infoUsuarioNome').textContent = nomeUsuario;
+                document.getElementById('infoUsuarioDiarias').textContent = `R$ ${(parseFloat(data.diarias) || 0).toFixed(2)}`;
+                document.getElementById('infoUsuarioTaxas').textContent = `R$ ${(parseFloat(data.taxas) || 0).toFixed(2)}`;
+                document.getElementById('infoUsuarioDescontos').textContent = `R$ ${(parseFloat(data.descontos) || 0).toFixed(2)}`;
+                
+                const total = (parseFloat(data.diarias) || 0) + (parseFloat(data.taxas) || 0) - (parseFloat(data.descontos) || 0);
+                document.getElementById('infoUsuarioTotal').textContent = `R$ ${total.toFixed(2)}`;
+                
+                card.classList.add('visible');
+            });
         }
 
         function renderBairrosTableIfOpen() {
@@ -457,7 +640,6 @@
             }
         }
 
-        // ========== CALENDÁRIO ==========
         function renderCalendar() {
             const year = currentDate.getFullYear(), month = currentDate.getMonth();
             const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -503,7 +685,6 @@
             document.getElementById('calendarInfo').textContent = `${selectedDays.size} dias selecionados`;
         }
 
-        // ========== BAIRROS ==========
         function ordenarBairros() { bairrosData.sort((a, b) => a.taxa - b.taxa); }
         
         function renderBairrosTable() {
@@ -627,7 +808,6 @@
             setTimeout(() => { document.getElementById('clearMsg').textContent = ''; }, 3000);
         }
 
-        // ========== COMANDAS ==========
         function renderComandas() {
             const lista = document.getElementById('comandasLista');
             lista.innerHTML = comandasData.length === 0 ? 
@@ -659,7 +839,6 @@
             setTimeout(() => { document.getElementById('comandasMsg').textContent = ''; }, 2000);
         }
 
-        // ========== ENTREGADORES ==========
         function addEntregador(nome, senha) {
             if (entregadoresData.find(e => e.nome.toLowerCase() === nome.toLowerCase())) 
                 return { success: false, message: '⚠️ Entregador já cadastrado!' };
@@ -711,7 +890,6 @@
             setTimeout(() => { msg.style.color = '#ffffff'; }, 3000);
         }
 
-        // ========== AUTENTICAÇÃO ==========
         const ADMIN_USER = "admin", ADMIN_PASS = "123";
         let loggedUser = null;
         let dadosCarregados = false;
@@ -782,13 +960,15 @@
             document.getElementById('loginError').textContent = '';
         }
 
-        // ========== CONFIGURAR CAMPOS DE TAXAS POR TIPO DE USUÁRIO ==========
         function configurarCamposTaxas() {
             const isAdmin = loggedUser && loggedUser.isAdmin;
             const diariasInput = document.getElementById('diariasInput');
             const taxasInput = document.getElementById('taxasInput');
             const descontosInput = document.getElementById('descontosInput');
             const saveBtn = document.getElementById('saveTaxesBtn');
+            const adminSearchSection = document.getElementById('adminSearchSection');
+            const usuarioInfoCard = document.getElementById('usuarioInfoCard');
+            const usuarioSelect = document.getElementById('usuarioSelect');
             
             if (isAdmin) {
                 diariasInput.readOnly = false;
@@ -798,6 +978,8 @@
                 taxasInput.classList.remove('readonly');
                 descontosInput.classList.remove('readonly');
                 saveBtn.style.display = 'block';
+                adminSearchSection.style.display = 'block';
+                atualizarSelectUsuarios();
             } else {
                 diariasInput.readOnly = true;
                 taxasInput.readOnly = true;
@@ -806,7 +988,12 @@
                 taxasInput.classList.add('readonly');
                 descontosInput.classList.add('readonly');
                 saveBtn.style.display = 'none';
+                adminSearchSection.style.display = 'none';
+                usuarioInfoCard.classList.remove('visible');
+                usuarioSelect.value = '';
             }
+            
+            calcularTotalAutomatico();
         }
 
         // ========== EVENTOS ==========
@@ -819,7 +1006,15 @@
         document.getElementById('confirmNo').addEventListener('click', fecharConfirmClear);
         document.getElementById('confirmModal').addEventListener('click', e => { if (e.target === document.getElementById('confirmModal')) fecharConfirmClear(); });
 
-        // ESC: fecha modais ou faz logout
+        // NOVO: Eventos para calcular total automático
+        document.getElementById('diariasInput').addEventListener('input', calcularTotalAutomatico);
+        document.getElementById('taxasInput').addEventListener('input', calcularTotalAutomatico);
+        document.getElementById('descontosInput').addEventListener('input', calcularTotalAutomatico);
+
+        document.getElementById('usuarioSelect').addEventListener('change', function() {
+            carregarDadosUsuario(this.value);
+        });
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 const activeModal = document.querySelector('.modal-overlay.active');
@@ -833,7 +1028,6 @@
             }
         });
 
-        // Modal Dias Rodados
         document.getElementById('itemDiasRodados').addEventListener('click', () => {
             document.getElementById('calendarModal').classList.add('active');
             renderCalendar();
@@ -842,7 +1036,6 @@
         document.getElementById('nextMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); });
         document.getElementById('closeCalendarModal').addEventListener('click', () => document.getElementById('calendarModal').classList.remove('active'));
 
-        // Modal Diárias, Taxas e Descontos
         document.getElementById('itemDiariasTaxas').addEventListener('click', () => {
             document.getElementById('taxesModal').classList.add('active');
             configurarCamposTaxas();
@@ -863,7 +1056,6 @@
         });
         document.getElementById('closeTaxesModal').addEventListener('click', () => document.getElementById('taxesModal').classList.remove('active'));
 
-        // Modal Tabela de Bairros
         document.getElementById('itemTabelaBairros').addEventListener('click', () => {
             document.getElementById('bairrosModal').classList.add('active');
             renderBairrosTable();
@@ -872,7 +1064,6 @@
         document.getElementById('importBairrosBtn').addEventListener('click', importarBairros);
         document.getElementById('closeBairrosModal').addEventListener('click', () => document.getElementById('bairrosModal').classList.remove('active'));
 
-        // Modal Comandas
         document.getElementById('itemComandas').addEventListener('click', () => {
             document.getElementById('comandasModal').classList.add('active');
             renderComandas();
@@ -881,7 +1072,6 @@
         document.getElementById('clearComandasBtn').addEventListener('click', limparComandas);
         document.getElementById('closeComandasModal').addEventListener('click', () => document.getElementById('comandasModal').classList.remove('active'));
 
-        // Modal Cadastro de Entregadores
         document.getElementById('itemCadastroEntregadores').addEventListener('click', () => {
             document.getElementById('entregadoresModal').classList.add('active');
             renderEntregadoresLista();
@@ -890,19 +1080,16 @@
         document.getElementById('addEntregadorBtn').addEventListener('click', realizarCadastroEntregador);
         document.getElementById('closeEntregadoresModal').addEventListener('click', () => document.getElementById('entregadoresModal').classList.remove('active'));
 
-        // Fechamento por clique fora
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
         });
 
-        // Navegação por Enter nos campos
         document.getElementById('novoBairroNome').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('novoBairroTaxa').focus(); });
         document.getElementById('novoBairroTaxa').addEventListener('keydown', e => { if (e.key === 'Enter') adicionarBairro(); });
         document.getElementById('entregadorNome').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('entregadorSenha').focus(); } });
         document.getElementById('entregadorSenha').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('entregadorConfirmaSenha').focus(); } });
         document.getElementById('entregadorConfirmaSenha').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); realizarCadastroEntregador(); } });
 
-        // Loading
         let progress = 0;
         const loadingInterval = setInterval(() => {
             progress += Math.floor(Math.random()*8)+2;
@@ -922,7 +1109,6 @@
             }
         }, 100);
 
-        // Partículas
         const canvas = document.getElementById('particlesCanvas'), ctx = canvas.getContext('2d');
         let particles = [];
         function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
