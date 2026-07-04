@@ -676,25 +676,56 @@
             setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
         }
 
-        // ========== AUTENTICAÇÃO ==========
+        // ========== AUTENTICAÇÃO (CORRIGIDA) ==========
         const ADMIN_USER = "admin", ADMIN_PASS = "123";
         let loggedUser = null;
+        let dadosCarregados = false;
+
+        // Marca quando os dados essenciais foram carregados
+        function verificarDadosCarregados() {
+            Promise.all([
+                new Promise(resolve => entregadoresRef.once('value', () => resolve())),
+                new Promise(resolve => bairrosRef.once('value', () => resolve()))
+            ]).then(() => {
+                dadosCarregados = true;
+                document.getElementById('loginError').textContent = '';
+            });
+        }
+
+        // Chama ao iniciar
+        verificarDadosCarregados();
 
         function attemptLogin() {
             const u = document.getElementById('usernameInput').value.trim();
             const p = document.getElementById('passwordInput').value.trim();
-            if (!u || !p) { document.getElementById('loginError').textContent = '⚠️ Preencha todos os campos'; return; }
+            
+            if (!u || !p) { 
+                document.getElementById('loginError').textContent = '⚠️ Preencha todos os campos'; 
+                return; 
+            }
+            
+            // Admin sempre funciona (não depende do banco)
             if (u === ADMIN_USER && p === ADMIN_PASS) { 
                 loggedUser = { username: ADMIN_USER, isAdmin: true }; 
                 entrarNoSistema(); 
                 return; 
             }
+            
+            // Se os dados ainda não carregaram, avisa
+            if (!dadosCarregados) {
+                document.getElementById('loginError').textContent = '⏳ Aguarde, carregando dados...';
+                setTimeout(() => attemptLogin(), 1000);
+                return;
+            }
+            
+            // Verifica entregadores
             const ent = entregadoresData.find(e => e.nome.toLowerCase() === u.toLowerCase() && e.senha === p);
             if (ent) { 
                 loggedUser = { username: ent.nome, isAdmin: false }; 
                 entrarNoSistema(); 
                 return; 
             }
+            
             document.getElementById('loginError').textContent = '⚠️ ACESSO NEGADO';
             document.getElementById('passwordInput').value = '';
             document.getElementById('passwordInput').focus();
@@ -710,6 +741,7 @@
             updateCounts();
             document.getElementById('usernameInput').value = '';
             document.getElementById('passwordInput').value = '';
+            document.getElementById('loginError').textContent = '';
         }
 
         function logout() {
@@ -717,6 +749,7 @@
             document.getElementById('mainContent').classList.remove('visible');
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('usernameInput').focus();
+            document.getElementById('loginError').textContent = '';
         }
 
         // ========== EVENTOS ==========
@@ -762,7 +795,6 @@
             const t = parseFloat(document.getElementById('taxasInput').value) || 0;
             const desc = parseFloat(document.getElementById('descontosInput').value) || 0;
             
-            // Salvar no banco
             taxasConfigRef.set({ diarias: d, taxas: t, descontos: desc });
             
             document.getElementById('diariasTaxasInfo').textContent = `Total: R$ ${(d + t - desc).toFixed(2)}`;
