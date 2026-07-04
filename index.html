@@ -143,6 +143,33 @@
         .status-dot { width: 8px; height: 8px; border-radius: 50%; }
         .status-dot.online { background: #00a859; box-shadow: 0 0 8px #00a859; }
         .status-dot.offline { background: #ce2b37; box-shadow: 0 0 8px #ce2b37; }
+        .futuristic-input.readonly {
+            opacity: 0.7;
+            cursor: not-allowed;
+            background: rgba(20,20,35,0.4);
+        }
+        /* NOVO: Labels das taxas em branco */
+        .tax-field label {
+            color: #ffffff !important;
+            font-family: 'Share Tech Mono';
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .tax-info-label {
+            color: #ffffff;
+            font-family: 'Share Tech Mono';
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+        }
+        .tax-info-value {
+            color: #ffffff;
+            font-family: 'Orbitron';
+            font-size: 1rem;
+            font-weight: 600;
+        }
         @media (max-width: 600px) { .main-container { padding: 25px 18px; } .main-title { font-size: 1.3rem; } }
     </style>
 </head>
@@ -208,11 +235,20 @@
         <div class="modal-box">
             <div class="modal-header"><span class="modal-title">💲 DIÁRIAS, TAXAS E DESCONTOS</span><button class="modal-close" id="closeTaxesModal">✕</button></div>
             <div style="display:flex;flex-direction:column;gap:16px;">
-                <div class="tax-field"><label>🏨 DIÁRIAS</label><input type="number" id="diariasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01"></div>
-                <div class="tax-field"><label>📋 TAXAS</label><input type="number" id="taxasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01"></div>
-                <div class="tax-field"><label>🔻 DESCONTOS</label><input type="number" id="descontosInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01"></div>
-                <button id="saveTaxesBtn" class="login-btn">💾 SALVAR</button>
-                <div id="taxesInfo" style="font-family:'Share Tech Mono';font-size:0.75rem;color:rgba(180,200,220,0.7);text-align:center;"></div>
+                <div class="tax-field">
+                    <label>🏨 DIÁRIAS</label>
+                    <input type="number" id="diariasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01">
+                </div>
+                <div class="tax-field">
+                    <label>📋 TAXAS</label>
+                    <input type="number" id="taxasInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01">
+                </div>
+                <div class="tax-field">
+                    <label>🔻 DESCONTOS</label>
+                    <input type="number" id="descontosInput" class="futuristic-input" placeholder="R$ 0,00" step="0.01">
+                </div>
+                <button id="saveTaxesBtn" class="login-btn admin-only-action" style="display:none;">💾 SALVAR</button>
+                <div id="taxesInfo" style="font-family:'Share Tech Mono';font-size:0.75rem;color:#ffffff;text-align:center;"></div>
             </div>
         </div>
     </div>
@@ -285,7 +321,7 @@
                 <div class="input-group"><label>🔑 SENHA DE ACESSO</label><input type="password" id="entregadorSenha" class="futuristic-input" placeholder="Digite a senha"></div>
                 <div class="input-group"><label>🔁 CONFIRMAR SENHA</label><input type="password" id="entregadorConfirmaSenha" class="futuristic-input" placeholder="Repita a senha"></div>
                 <button type="button" id="addEntregadorBtn" class="login-btn" style="margin-top:6px;">➕ CADASTRAR E ACESSAR</button>
-                <div id="entregadorMsg" style="font-family:'Share Tech Mono';font-size:0.75rem;color:rgba(180,200,220,0.7);text-align:center;min-height:20px;"></div>
+                <div id="entregadorMsg" style="font-family:'Share Tech Mono';font-size:0.75rem;color:#ffffff;text-align:center;min-height:20px;"></div>
                 <div style="margin-top:10px;"><div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);letter-spacing:2px;margin-bottom:10px;">ENTREGADORES CADASTRADOS</div><div id="entregadoresLista" style="max-height:200px;overflow-y:auto;"></div></div>
             </div>
         </div>
@@ -455,7 +491,6 @@
                         selectedDays.add(key);
                         dayEl.classList.add('selected');
                     }
-                    // Salvar no banco
                     const diasObj = {};
                     selectedDays.forEach(k => diasObj[k] = true);
                     diasRodadosRef.set(diasObj);
@@ -673,15 +708,14 @@
                 document.getElementById('entregadorSenha').value = '';
                 document.getElementById('entregadorConfirmaSenha').value = '';
             }
-            setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
+            setTimeout(() => { msg.style.color = '#ffffff'; }, 3000);
         }
 
-        // ========== AUTENTICAÇÃO (CORRIGIDA) ==========
+        // ========== AUTENTICAÇÃO ==========
         const ADMIN_USER = "admin", ADMIN_PASS = "123";
         let loggedUser = null;
         let dadosCarregados = false;
 
-        // Marca quando os dados essenciais foram carregados
         function verificarDadosCarregados() {
             Promise.all([
                 new Promise(resolve => entregadoresRef.once('value', () => resolve())),
@@ -692,7 +726,6 @@
             });
         }
 
-        // Chama ao iniciar
         verificarDadosCarregados();
 
         function attemptLogin() {
@@ -704,21 +737,18 @@
                 return; 
             }
             
-            // Admin sempre funciona (não depende do banco)
             if (u === ADMIN_USER && p === ADMIN_PASS) { 
                 loggedUser = { username: ADMIN_USER, isAdmin: true }; 
                 entrarNoSistema(); 
                 return; 
             }
             
-            // Se os dados ainda não carregaram, avisa
             if (!dadosCarregados) {
                 document.getElementById('loginError').textContent = '⏳ Aguarde, carregando dados...';
                 setTimeout(() => attemptLogin(), 1000);
                 return;
             }
             
-            // Verifica entregadores
             const ent = entregadoresData.find(e => e.nome.toLowerCase() === u.toLowerCase() && e.senha === p);
             if (ent) { 
                 loggedUser = { username: ent.nome, isAdmin: false }; 
@@ -750,6 +780,33 @@
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('usernameInput').focus();
             document.getElementById('loginError').textContent = '';
+        }
+
+        // ========== CONFIGURAR CAMPOS DE TAXAS POR TIPO DE USUÁRIO ==========
+        function configurarCamposTaxas() {
+            const isAdmin = loggedUser && loggedUser.isAdmin;
+            const diariasInput = document.getElementById('diariasInput');
+            const taxasInput = document.getElementById('taxasInput');
+            const descontosInput = document.getElementById('descontosInput');
+            const saveBtn = document.getElementById('saveTaxesBtn');
+            
+            if (isAdmin) {
+                diariasInput.readOnly = false;
+                taxasInput.readOnly = false;
+                descontosInput.readOnly = false;
+                diariasInput.classList.remove('readonly');
+                taxasInput.classList.remove('readonly');
+                descontosInput.classList.remove('readonly');
+                saveBtn.style.display = 'block';
+            } else {
+                diariasInput.readOnly = true;
+                taxasInput.readOnly = true;
+                descontosInput.readOnly = true;
+                diariasInput.classList.add('readonly');
+                taxasInput.classList.add('readonly');
+                descontosInput.classList.add('readonly');
+                saveBtn.style.display = 'none';
+            }
         }
 
         // ========== EVENTOS ==========
@@ -788,9 +845,13 @@
         // Modal Diárias, Taxas e Descontos
         document.getElementById('itemDiariasTaxas').addEventListener('click', () => {
             document.getElementById('taxesModal').classList.add('active');
+            configurarCamposTaxas();
             document.getElementById('diariasInput').focus();
         });
+        
         document.getElementById('saveTaxesBtn').addEventListener('click', () => {
+            if (!loggedUser || !loggedUser.isAdmin) return;
+            
             const d = parseFloat(document.getElementById('diariasInput').value) || 0;
             const t = parseFloat(document.getElementById('taxasInput').value) || 0;
             const desc = parseFloat(document.getElementById('descontosInput').value) || 0;
