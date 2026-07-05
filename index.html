@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle Financeiro — Acesso Restrito (Demonstração)</title>
+    <title>Controle Financeiro — Acesso Restrito</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -227,7 +227,6 @@
             <li class="list-item admin-only" id="itemCadastroEntregadores" style="display:none;"><div class="item-indicator">🧑‍💼</div><div class="item-content"><div class="item-title">Cadastro de Entregadores</div><div class="item-desc" id="entregadoresCount"></div></div><span class="item-arrow">▶</span></li>
         </ul>
     </div>
-    <!-- Modal Liberar Acesso (com data e hora) -->
     <div id="liberarAcessoModal" class="modal-overlay">
         <div class="modal-box" style="max-width:600px;">
             <div class="modal-header"><span class="modal-title">🟢 LIBERAR ACESSO</span><button class="modal-close" id="closeLiberarAcessoModal">✕</button></div>
@@ -250,10 +249,7 @@
                     <div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);margin-bottom:12px;letter-spacing:2px;">👥 USUÁRIOS LIBERADOS</div>
                     <div class="import-format-info">
                         <strong>Importar via TXT:</strong> Cole os nomes dos entregadores (um por linha) para liberar o acesso.<br>
-                        <strong>Exemplo:</strong><br>
-                        João Silva<br>
-                        Maria Santos<br>
-                        Pedro Alves
+                        <strong>Exemplo:</strong><br>João Silva<br>Maria Santos<br>Pedro Alves
                     </div>
                     <textarea id="liberarUsuariosText" class="futuristic-input" placeholder="Cole os nomes aqui (um por linha)...&#10;João Silva&#10;Maria Santos"></textarea>
                     <button id="importLiberarUsuariosBtn" class="login-btn" style="margin-top:8px;">⬇️ IMPORTAR USUÁRIOS</button>
