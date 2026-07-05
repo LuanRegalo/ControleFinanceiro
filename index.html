@@ -59,7 +59,9 @@
             width: 100%; padding: 12px 15px; background: rgba(20,20,35,0.7); border: 1px solid rgba(0,168,89,0.3);
             border-radius: 8px; font-family: 'Share Tech Mono'; font-size: 1rem; color: var(--white); outline: none;
         }
+        .futuristic-input::placeholder { color: rgba(255,255,255,0.5); font-size: 1.2rem; }
         .futuristic-input:focus { border-color: var(--green); box-shadow: 0 0 15px rgba(0,168,89,0.4); }
+        .futuristic-input:focus::placeholder { color: rgba(0,168,89,0.5); }
         .futuristic-input.readonly:focus { border-color: rgba(0,168,89,0.3) !important; box-shadow: none !important; }
         select.futuristic-input {
             appearance: none;
@@ -122,7 +124,7 @@
         .bairros-table th, .bairros-table td { padding: 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); color: #d0d8e0; font-size: 0.8rem; }
         .bairros-table th { color: var(--green); font-size: 0.7rem; letter-spacing: 2px; }
         .bairros-table button { background: rgba(206,43,55,0.2); border: 1px solid rgba(206,43,55,0.5); color: var(--red); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
-        textarea.futuristic-input { height: 150px; resize: vertical; font-size: 0.75rem; line-height: 1.6; }
+        textarea.futuristic-input { height: 120px; resize: vertical; font-size: 0.75rem; line-height: 1.6; }
         .admin-section { display: none; }
         .confirm-box { text-align: center; max-width: 350px; padding: 30px; }
         .confirm-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 20px; }
@@ -174,6 +176,9 @@
             line-height: 1.5;
         }
         .import-format-info strong { color: var(--green); }
+        .usuarios-liberados-list { max-height: 200px; overflow-y: auto; margin-top: 10px; }
+        .usuario-liberado-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #d0d8e0; font-size: 0.75rem; }
+        .usuario-liberado-item button { background: rgba(206,43,55,0.2); border: 1px solid rgba(206,43,55,0.5); color: var(--red); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.6rem; }
         @media (max-width: 600px) { .main-container { padding: 25px 18px; } .main-title { font-size: 1.3rem; } }
     </style>
 </head>
@@ -193,8 +198,8 @@
     <div id="loginScreen" class="overlay-screen hidden">
         <div class="overlay-box">
             <div class="login-icon">🔐</div>
-            <div class="input-group"><label>👤 USUÁRIO</label><input type="text" id="usernameInput" class="futuristic-input" placeholder="Digite o usuário"></div>
-            <div class="input-group"><label>🔑 SENHA</label><input type="password" id="passwordInput" class="futuristic-input" placeholder="Digite a senha"></div>
+            <div class="input-group"><input type="text" id="usernameInput" class="futuristic-input" placeholder="👤"></div>
+            <div class="input-group"><input type="password" id="passwordInput" class="futuristic-input" placeholder="🔑"></div>
             <button id="loginBtn" class="login-btn">ENTRAR</button>
             <div id="loginError" class="error-msg"></div>
         </div>
@@ -207,12 +212,62 @@
         </div>
         <div class="divider"></div>
         <ul class="futuristic-list">
+            <li class="list-item admin-only" id="itemLiberarAcesso" style="display:none;">
+                <div class="item-indicator">🟢</div>
+                <div class="item-content">
+                    <div class="item-title">Liberar Acesso</div>
+                    <div class="item-desc" id="liberarAcessoInfo"></div>
+                </div>
+                <span class="item-arrow">▶</span>
+            </li>
             <li class="list-item" id="itemDiasRodados"><div class="item-indicator">📅</div><div class="item-content"><div class="item-title">Dias Rodados</div><div class="item-desc" id="diasRodadosInfo"></div></div><span class="item-arrow">▶</span></li>
             <li class="list-item" id="itemDiariasTaxas"><div class="item-indicator">💲</div><div class="item-content"><div class="item-title">Diárias, Taxas e Descontos</div><div class="item-desc" id="diariasTaxasInfo"></div></div><span class="item-arrow">▶</span></li>
             <li class="list-item" id="itemTabelaBairros"><div class="item-indicator">🏙️</div><div class="item-content"><div class="item-title">Tabela de Bairros</div><div class="item-desc"></div></div><span class="item-arrow">▶</span></li>
             <li class="list-item admin-only" id="itemComandas" style="display:none;"><div class="item-indicator">📋</div><div class="item-content"><div class="item-title">Comandas</div><div class="item-desc" id="comandasCount"></div></div><span class="item-arrow">▶</span></li>
             <li class="list-item admin-only" id="itemCadastroEntregadores" style="display:none;"><div class="item-indicator">🧑‍💼</div><div class="item-content"><div class="item-title">Cadastro de Entregadores</div><div class="item-desc" id="entregadoresCount"></div></div><span class="item-arrow">▶</span></li>
         </ul>
+    </div>
+    <!-- Modal Liberar Acesso (com data e hora) -->
+    <div id="liberarAcessoModal" class="modal-overlay">
+        <div class="modal-box" style="max-width:600px;">
+            <div class="modal-header"><span class="modal-title">🟢 LIBERAR ACESSO</span><button class="modal-close" id="closeLiberarAcessoModal">✕</button></div>
+            <div style="display:flex;flex-direction:column;gap:16px;">
+                <div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);margin-bottom:4px;letter-spacing:2px;">📅 DATA E HORA DE ACESSO</div>
+                <div class="input-group">
+                    <label>🟢 DATA E HORA DE LIBERAÇÃO</label>
+                    <input type="datetime-local" id="dataHoraLiberacao" class="futuristic-input">
+                </div>
+                <div class="input-group">
+                    <label>🔴 DATA E HORA DE BLOQUEIO</label>
+                    <input type="datetime-local" id="dataHoraBloqueio" class="futuristic-input">
+                </div>
+                <div style="font-family:'Share Tech Mono';font-size:0.7rem;color:rgba(180,200,220,0.5);text-align:center;">
+                    Status: <span id="statusAcessoAtual" style="color:#00a859;">Acesso liberado</span>
+                </div>
+                <button id="saveHorariosBtn" class="login-btn">💾 SALVAR DATAS</button>
+                <div id="horariosMsg" style="font-family:'Share Tech Mono';font-size:0.7rem;color:#ffffff;text-align:center;min-height:20px;"></div>
+                <div style="border-top:1px solid rgba(0,168,89,0.3); padding-top:15px; margin-top:5px;">
+                    <div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);margin-bottom:12px;letter-spacing:2px;">👥 USUÁRIOS LIBERADOS</div>
+                    <div class="import-format-info">
+                        <strong>Importar via TXT:</strong> Cole os nomes dos entregadores (um por linha) para liberar o acesso.<br>
+                        <strong>Exemplo:</strong><br>
+                        João Silva<br>
+                        Maria Santos<br>
+                        Pedro Alves
+                    </div>
+                    <textarea id="liberarUsuariosText" class="futuristic-input" placeholder="Cole os nomes aqui (um por linha)...&#10;João Silva&#10;Maria Santos"></textarea>
+                    <button id="importLiberarUsuariosBtn" class="login-btn" style="margin-top:8px;">⬇️ IMPORTAR USUÁRIOS</button>
+                    <div id="liberarUsuariosMsg" style="font-family:'Share Tech Mono';font-size:0.7rem;color:#ffffff;text-align:center;min-height:20px;margin-top:5px;"></div>
+                    <div style="margin-top:12px;">
+                        <div style="font-family:'Share Tech Mono';font-size:0.65rem;color:rgba(180,200,220,0.5);margin-bottom:5px;">Liberados: <span id="liberadosCount">0</span></div>
+                        <div class="usuarios-liberados-list" id="usuariosLiberadosLista">
+                            <div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhum usuário liberado</div>
+                        </div>
+                        <button id="clearLiberadosBtn" class="login-btn danger-btn" style="margin-top:8px;">🗑️ REMOVER TODOS</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <div id="calendarModal" class="modal-overlay">
         <div class="modal-box">
@@ -285,12 +340,9 @@
             </div>
         </div>
     </div>
-    <!-- Modal Comandas (IMPORTAÇÃO TXT) -->
     <div id="comandasModal" class="modal-overlay">
         <div class="modal-box" style="max-width:850px;">
             <div class="modal-header"><span class="modal-title">📋 COMANDAS</span><button class="modal-close" id="closeComandasModal">✕</button></div>
-            
-            <!-- Área de importação -->
             <div style="border: 1px solid rgba(0,168,89,0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
                 <div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);margin-bottom:8px;letter-spacing:2px;">📥 IMPORTAR COMANDAS (TXT)</div>
                 <div class="import-format-info">
@@ -303,8 +355,6 @@
                 <button id="importComandasTxtBtn" class="login-btn" style="margin-top:8px;">⬇️ IMPORTAR DO TEXTO</button>
                 <div id="comandasImportMsg" style="font-family:'Share Tech Mono';font-size:0.7rem;color:#ffffff;text-align:center;min-height:20px;margin-top:5px;"></div>
             </div>
-
-            <!-- Tabela de comandas -->
             <div style="border-top:1px solid rgba(0,168,89,0.3); padding-top:15px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                     <div style="font-family:'Orbitron';font-size:0.8rem;color:var(--green);">📌 COMANDAS REGISTRADAS</div>
@@ -314,14 +364,7 @@
                     <table class="comandas-table" id="comandasTable">
                         <thead>
                             <tr>
-                                <th>Data</th>
-                                <th>Motoboy</th>
-                                <th>Nº</th>
-                                <th>Bairro</th>
-                                <th>Horário</th>
-                                <th>Grupo</th>
-                                <th>Valor</th>
-                                <th></th>
+                                <th>Data</th><th>Motoboy</th><th>Nº</th><th>Bairro</th><th>Horário</th><th>Grupo</th><th>Valor</th><th></th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -363,9 +406,12 @@
         const diasRodadosRef = database.ref('diasRodados');
         const taxasConfigRef = database.ref('taxasConfig');
         const taxasPorUsuarioRef = database.ref('taxasPorUsuario');
+        const liberarAcessoRef = database.ref('liberarAcesso');
+        const usuariosLiberadosRef = database.ref('usuariosLiberados');
         let bairrosData = [];
         let entregadoresData = [];
         let comandasData = [];
+        let usuariosLiberadosData = [];
         let currentDate = new Date();
         let selectedDays = new Set();
         let usuarioSelecionadoAtual = '';
@@ -406,6 +452,56 @@
                 updateTaxasInfo(data); calcularTotalAutomatico();
             }
         });
+        liberarAcessoRef.on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            document.getElementById('dataHoraLiberacao').value = data.liberacao || '';
+            document.getElementById('dataHoraBloqueio').value = data.bloqueio || '';
+            atualizarStatusAcesso(data);
+        });
+        usuariosLiberadosRef.on('value', (snapshot) => {
+            usuariosLiberadosData = snapshot.val() || [];
+            if (!Array.isArray(usuariosLiberadosData)) { usuariosLiberadosData = Object.values(usuariosLiberadosData); }
+            renderUsuariosLiberadosLista();
+        });
+        function atualizarStatusAcesso(data) {
+            const agora = new Date();
+            const agoraTimestamp = agora.getTime();
+            const lib = data.liberacao ? new Date(data.liberacao).getTime() : 0;
+            const bloq = data.bloqueio ? new Date(data.bloqueio).getTime() : Infinity;
+            const statusEl = document.getElementById('statusAcessoAtual');
+            const infoEl = document.getElementById('liberarAcessoInfo');
+            if (lib === 0 && bloq === Infinity) {
+                if (statusEl) { statusEl.textContent = 'Não configurado'; statusEl.style.color = '#ffaa00'; }
+                if (infoEl) infoEl.textContent = '';
+            } else if (agoraTimestamp >= lib && agoraTimestamp < bloq) {
+                if (statusEl) { statusEl.textContent = 'Acesso liberado'; statusEl.style.color = '#00a859'; }
+                if (infoEl) { infoEl.textContent = '🟢 Liberado'; infoEl.style.color = '#00a859'; }
+            } else {
+                if (statusEl) { statusEl.textContent = 'Acesso bloqueado'; statusEl.style.color = '#ce2b37'; }
+                if (infoEl) { infoEl.textContent = '🔴 Bloqueado'; infoEl.style.color = '#ce2b37'; }
+            }
+        }
+        function renderUsuariosLiberadosLista() {
+            const lista = document.getElementById('usuariosLiberadosLista');
+            const countEl = document.getElementById('liberadosCount');
+            if (countEl) countEl.textContent = usuariosLiberadosData.length;
+            if (usuariosLiberadosData.length === 0) {
+                lista.innerHTML = '<div style="color:rgba(180,200,220,0.5);text-align:center;padding:10px;">Nenhum usuário liberado</div>';
+            } else {
+                lista.innerHTML = usuariosLiberadosData.map((nome, index) => `
+                    <div class="usuario-liberado-item">
+                        <span>✅ ${nome}</span>
+                        <button class="remove-liberado" data-index="${index}">✕</button>
+                    </div>`).join('');
+                document.querySelectorAll('.remove-liberado').forEach(btn => {
+                    btn.onclick = (e) => {
+                        const index = parseInt(e.target.getAttribute('data-index'));
+                        usuariosLiberadosData.splice(index, 1);
+                        usuariosLiberadosRef.set(usuariosLiberadosData);
+                    };
+                });
+            }
+        }
         function updateCounts() {
             const entCount = document.getElementById('entregadoresCount');
             const comCount = document.getElementById('comandasCount');
@@ -507,10 +603,7 @@
             document.getElementById('bairrosCount').textContent = bairrosData.length;
             if (isAdmin) {
                 document.querySelectorAll('.remove-bairro').forEach(btn => {
-                    btn.onclick = (e) => {
-                        const index = parseInt(e.target.getAttribute('data-index'));
-                        bairrosData.splice(index, 1); saveBairros(bairrosData); renderBairrosTable();
-                    };
+                    btn.onclick = (e) => { const index = parseInt(e.target.getAttribute('data-index')); bairrosData.splice(index, 1); saveBairros(bairrosData); renderBairrosTable(); };
                 });
             }
             document.getElementById('adminImportSection').style.display = isAdmin ? 'block' : 'none';
@@ -521,25 +614,11 @@
         function parseLinhaBairro(linha) {
             linha = linha.trim(); if (!linha) return null;
             let parts = linha.split(';');
-            if (parts.length >= 2) {
-                const nome = parts[0].trim();
-                const valorStr = parts[1].trim().replace('R$', '').replace(/\./g, '').replace(',', '.');
-                const valor = parseFloat(valorStr);
-                if (nome && !isNaN(valor) && valor >= 0) return { nome, taxa: valor };
-            }
+            if (parts.length >= 2) { const nome = parts[0].trim(); const valorStr = parts[1].trim().replace('R$', '').replace(/\./g, '').replace(',', '.'); const valor = parseFloat(valorStr); if (nome && !isNaN(valor) && valor >= 0) return { nome, taxa: valor }; }
             const match = linha.match(/^(.+?)\s+R?\$?\s*([\d,.]+)\s*$/);
-            if (match) {
-                const nome = match[1].trim();
-                const valorStr = match[2].replace('R$', '').replace(/\./g, '').replace(',', '.');
-                const valor = parseFloat(valorStr);
-                if (nome && !isNaN(valor) && valor >= 0) return { nome, taxa: valor };
-            }
+            if (match) { const nome = match[1].trim(); const valorStr = match[2].replace('R$', '').replace(/\./g, '').replace(',', '.'); const valor = parseFloat(valorStr); if (nome && !isNaN(valor) && valor >= 0) return { nome, taxa: valor }; }
             const tokens = linha.split(/\s+/);
-            if (tokens.length >= 2) {
-                const ultimo = tokens[tokens.length-1].replace('R$', '').replace(',', '.');
-                const valor = parseFloat(ultimo);
-                if (!isNaN(valor) && valor >= 0) { const nome = tokens.slice(0, -1).join(' '); return { nome, taxa: valor }; }
-            }
+            if (tokens.length >= 2) { const ultimo = tokens[tokens.length-1].replace('R$', '').replace(',', '.'); const valor = parseFloat(ultimo); if (!isNaN(valor) && valor >= 0) { const nome = tokens.slice(0, -1).join(' '); return { nome, taxa: valor }; } }
             return null;
         }
         function importarBairros() {
@@ -550,17 +629,9 @@
             const lines = text.split('\n').filter(line => line.trim() !== '');
             let novos = 0, erros = 0;
             const novosBairros = [];
-            for (let line of lines) {
-                const parsed = parseLinhaBairro(line);
-                if (!parsed) { erros++; continue; }
-                if (bairrosData.some(b => b.nome.toLowerCase() === parsed.nome.toLowerCase())) { erros++; continue; }
-                novosBairros.push(parsed); novos++;
-            }
-            if (novos > 0) {
-                const atualizados = [...bairrosData, ...novosBairros]; saveBairros(atualizados);
-                msg.textContent = `✅ ${novos} bairro(s) importado(s)!`; msg.style.color = '#00a859';
-                document.getElementById('importBairrosText').value = '';
-            } else { msg.textContent = `⚠️ Nenhum bairro novo (${erros} erros/duplicados).`; msg.style.color = '#ce2b37'; }
+            for (let line of lines) { const parsed = parseLinhaBairro(line); if (!parsed) { erros++; continue; } if (bairrosData.some(b => b.nome.toLowerCase() === parsed.nome.toLowerCase())) { erros++; continue; } novosBairros.push(parsed); novos++; }
+            if (novos > 0) { const atualizados = [...bairrosData, ...novosBairros]; saveBairros(atualizados); msg.textContent = `✅ ${novos} bairro(s) importado(s)!`; msg.style.color = '#00a859'; document.getElementById('importBairrosText').value = ''; }
+            else { msg.textContent = `⚠️ Nenhum bairro novo (${erros} erros/duplicados).`; msg.style.color = '#ce2b37'; }
             setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 4000);
         }
         function adicionarBairro() {
@@ -572,23 +643,14 @@
             if (taxa < 0) { msg.textContent = '⚠️ Valor não pode ser negativo.'; msg.style.color = '#ce2b37'; return; }
             if (bairrosData.some(b => b.nome.toLowerCase() === nome.toLowerCase())) { msg.textContent = '⚠️ Bairro já existe.'; msg.style.color = '#ce2b37'; return; }
             bairrosData.push({ nome, taxa }); saveBairros(bairrosData);
-            document.getElementById('novoBairroNome').value = '';
-            document.getElementById('novoBairroTaxa').value = '';
+            document.getElementById('novoBairroNome').value = ''; document.getElementById('novoBairroTaxa').value = '';
             msg.textContent = '✅ Bairro adicionado!'; msg.style.color = '#00a859';
             setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
         }
         function abrirConfirmClear() { document.getElementById('confirmModal').classList.add('active'); }
         function fecharConfirmClear() { document.getElementById('confirmModal').classList.remove('active'); }
-        function executarLimpeza() {
-            saveBairros([]); fecharConfirmClear();
-            document.getElementById('clearMsg').textContent = '✅ Todos os bairros foram removidos.';
-            document.getElementById('clearMsg').style.color = '#00a859';
-            setTimeout(() => { document.getElementById('clearMsg').textContent = ''; }, 3000);
-        }
-
-        // ========== COMANDAS (IMPORTAÇÃO TXT) ==========
+        function executarLimpeza() { saveBairros([]); fecharConfirmClear(); document.getElementById('clearMsg').textContent = '✅ Todos os bairros foram removidos.'; document.getElementById('clearMsg').style.color = '#00a859'; setTimeout(() => { document.getElementById('clearMsg').textContent = ''; }, 3000); }
         const GRUPOS_VALIDOS = ['regalo', 'boutique', 'sushi'];
-
         function getBadgeGrupo(grupo) {
             if (!grupo) return '-';
             const g = grupo.toLowerCase();
@@ -597,133 +659,48 @@
             if (g === 'sushi') return '<span class="badge-grupo badge-sushi">Sushi</span>';
             return grupo;
         }
-
         function parseLinhaComanda(linha) {
-            linha = linha.trim();
-            if (!linha) return null;
-            
-            // Tenta separar por TAB ou ponto-e-vírgula
+            linha = linha.trim(); if (!linha) return null;
             let parts;
-            if (linha.includes('\t')) {
-                parts = linha.split('\t');
-            } else if (linha.includes(';')) {
-                parts = linha.split(';');
-            } else {
-                // Tenta separar por espaços múltiplos
-                parts = linha.split(/\s{2,}/);
-                if (parts.length < 7) return null;
-            }
-            
+            if (linha.includes('\t')) { parts = linha.split('\t'); }
+            else if (linha.includes(';')) { parts = linha.split(';'); }
+            else { parts = linha.split(/\s{2,}/); if (parts.length < 7) return null; }
             if (parts.length < 7) return null;
-            
-            const data = parts[0].trim();
-            const motoboy = parts[1].trim();
-            const numero = parts[2].trim();
-            const bairro = parts[3].trim();
-            const horario = parts[4].trim();
-            const grupo = parts[5].trim();
+            const data = parts[0].trim(), motoboy = parts[1].trim(), numero = parts[2].trim(), bairro = parts[3].trim(), horario = parts[4].trim(), grupo = parts[5].trim();
             const valorStr = parts[6].trim().replace('R$', '').replace(/\./g, '').replace(',', '.');
             const valor = parseFloat(valorStr);
-            
-            // Validações
             if (!data || !motoboy || !numero || !bairro || !horario || !grupo || isNaN(valor)) return null;
             if (!/^\d{4}$/.test(numero)) return null;
             if (!GRUPOS_VALIDOS.includes(grupo.toLowerCase())) return null;
             if (valor < 0) return null;
-            
-            return {
-                data: data,
-                motoboy: motoboy,
-                numero: numero,
-                bairro: bairro,
-                horario: horario,
-                grupo: grupo.charAt(0).toUpperCase() + grupo.slice(1).toLowerCase(),
-                valor: valor,
-                timestamp: new Date().toISOString()
-            };
+            return { data, motoboy, numero, bairro, horario, grupo: grupo.charAt(0).toUpperCase() + grupo.slice(1).toLowerCase(), valor, timestamp: new Date().toISOString() };
         }
-
         function importarComandasTxt() {
             if (!loggedUser || !loggedUser.isAdmin) return;
-            
             const text = document.getElementById('comandasImportText').value.trim();
             const msg = document.getElementById('comandasImportMsg');
-            
-            if (!text) {
-                msg.textContent = '⚠️ Cole os dados das comandas no formato indicado.';
-                msg.style.color = '#ce2b37';
-                return;
-            }
-            
+            if (!text) { msg.textContent = '⚠️ Cole os dados das comandas no formato indicado.'; msg.style.color = '#ce2b37'; return; }
             const lines = text.split('\n').filter(line => line.trim() !== '');
             let importadas = 0, erros = 0;
             const novasComandas = [];
-            
-            for (let line of lines) {
-                const parsed = parseLinhaComanda(line);
-                if (parsed) {
-                    novasComandas.push(parsed);
-                    importadas++;
-                } else {
-                    erros++;
-                }
-            }
-            
-            if (importadas > 0) {
-                const atualizadas = [...comandasData, ...novasComandas];
-                comandasRef.set(atualizadas);
-                document.getElementById('comandasImportText').value = '';
-                msg.textContent = `✅ ${importadas} comanda(s) importada(s)!${erros > 0 ? ` (${erros} linha(s) com erro)` : ''}`;
-                msg.style.color = '#00a859';
-            } else {
-                msg.textContent = `⚠️ Nenhuma comanda válida encontrada (${erros} erros). Verifique o formato.`;
-                msg.style.color = '#ce2b37';
-            }
-            
+            for (let line of lines) { const parsed = parseLinhaComanda(line); if (parsed) { novasComandas.push(parsed); importadas++; } else { erros++; } }
+            if (importadas > 0) { const atualizadas = [...comandasData, ...novasComandas]; comandasRef.set(atualizadas); document.getElementById('comandasImportText').value = ''; msg.textContent = `✅ ${importadas} comanda(s) importada(s)!${erros > 0 ? ` (${erros} linha(s) com erro)` : ''}`; msg.style.color = '#00a859'; }
+            else { msg.textContent = `⚠️ Nenhuma comanda válida encontrada (${erros} erros). Verifique o formato.`; msg.style.color = '#ce2b37'; }
             setTimeout(() => { msg.style.color = '#ffffff'; msg.textContent = ''; }, 5000);
         }
-
         function renderComandas() {
             const tbody = document.querySelector('#comandasTable tbody');
             const isAdmin = loggedUser && loggedUser.isAdmin;
-            
-            if (comandasData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:rgba(180,200,220,0.5);padding:15px;">Nenhuma comanda registrada</td></tr>';
-            } else {
-                tbody.innerHTML = comandasData.map((c, index) => `
-                    <tr>
-                        <td>${c.data || '-'}</td>
-                        <td>${c.motoboy || '-'}</td>
-                        <td>${c.numero || '-'}</td>
-                        <td>${c.bairro || '-'}</td>
-                        <td>${c.horario || '-'}</td>
-                        <td>${getBadgeGrupo(c.grupo)}</td>
-                        <td style="color:#00ff88;">${c.valor ? `R$ ${parseFloat(c.valor).toFixed(2)}` : '-'}</td>
-                        ${isAdmin ? `<td><button class="remove-comanda" data-index="${index}" style="background:rgba(206,43,55,0.2);border:1px solid rgba(206,43,55,0.5);color:var(--red);padding:2px 6px;border-radius:4px;cursor:pointer;font-size:0.6rem;">✕</button></td>` : '<td></td>'}
-                    </tr>
-                `).join('');
-                
-                if (isAdmin) {
-                    document.querySelectorAll('.remove-comanda').forEach(btn => {
-                        btn.onclick = (e) => {
-                            const index = parseInt(e.target.getAttribute('data-index'));
-                            comandasData.splice(index, 1);
-                            comandasRef.set(comandasData);
-                            renderComandas();
-                        };
-                    });
-                }
+            if (comandasData.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:rgba(180,200,220,0.5);padding:15px;">Nenhuma comanda registrada</td></tr>'; }
+            else {
+                tbody.innerHTML = comandasData.map((c, index) => `<tr><td>${c.data||'-'}</td><td>${c.motoboy||'-'}</td><td>${c.numero||'-'}</td><td>${c.bairro||'-'}</td><td>${c.horario||'-'}</td><td>${getBadgeGrupo(c.grupo)}</td><td style="color:#00ff88;">${c.valor?'R$ '+parseFloat(c.valor).toFixed(2):'-'}</td>${isAdmin?`<td><button class="remove-comanda" data-index="${index}" style="background:rgba(206,43,55,0.2);border:1px solid rgba(206,43,55,0.5);color:var(--red);padding:2px 6px;border-radius:4px;cursor:pointer;font-size:0.6rem;">✕</button></td>`:'<td></td>'}</tr>`).join('');
+                if (isAdmin) { document.querySelectorAll('.remove-comanda').forEach(btn => { btn.onclick = (e) => { const index = parseInt(e.target.getAttribute('data-index')); comandasData.splice(index, 1); comandasRef.set(comandasData); renderComandas(); }; }); }
             }
-            
             document.getElementById('comandasTotalCount').textContent = comandasData.length;
             const soma = comandasData.reduce((acc, c) => acc + (parseFloat(c.valor) || 0), 0);
             document.getElementById('comandasSomaValores').textContent = `R$ ${soma.toFixed(2)}`;
         }
-
-        function limparComandas() {
-            comandasRef.set([]);
-        }
-
+        function limparComandas() { comandasRef.set([]); }
         function addEntregador(nome, senha) {
             if (entregadoresData.find(e => e.nome.toLowerCase() === nome.toLowerCase())) return { success: false, message: '⚠️ Entregador já cadastrado!' };
             if (nome.toLowerCase() === 'admin') return { success: false, message: '⚠️ Nome reservado!' };
@@ -745,15 +722,36 @@
             if (senha !== confirma) { msg.textContent = '⚠️ Senhas não conferem'; msg.style.color = '#ce2b37'; return; }
             const result = addEntregador(nome, senha);
             msg.textContent = result.message; msg.style.color = result.success ? '#00a859' : '#ce2b37';
-            if (result.success) {
-                document.getElementById('entregadoresModal').classList.remove('active');
-                loggedUser = { username: nome, isAdmin: false }; entrarNoSistema();
-                document.getElementById('entregadorNome').value = '';
-                document.getElementById('entregadorSenha').value = '';
-                document.getElementById('entregadorConfirmaSenha').value = '';
-            }
+            if (result.success) { document.getElementById('entregadoresModal').classList.remove('active'); loggedUser = { username: nome, isAdmin: false }; entrarNoSistema(); document.getElementById('entregadorNome').value = ''; document.getElementById('entregadorSenha').value = ''; document.getElementById('entregadorConfirmaSenha').value = ''; }
             setTimeout(() => { msg.style.color = '#ffffff'; }, 3000);
         }
+        function importarUsuariosLiberados() {
+            if (!loggedUser || !loggedUser.isAdmin) return;
+            const text = document.getElementById('liberarUsuariosText').value.trim();
+            const msg = document.getElementById('liberarUsuariosMsg');
+            if (!text) { msg.textContent = '⚠️ Cole os nomes dos entregadores.'; msg.style.color = '#ce2b37'; return; }
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l !== '');
+            let adicionados = 0;
+            const novos = [];
+            for (let line of lines) {
+                const nomeNormalizado = line.toLowerCase();
+                if (!usuariosLiberadosData.some(u => u.toLowerCase() === nomeNormalizado)) {
+                    novos.push(line); adicionados++;
+                }
+            }
+            if (adicionados > 0) {
+                const atualizados = [...usuariosLiberadosData, ...novos];
+                usuariosLiberadosRef.set(atualizados);
+                document.getElementById('liberarUsuariosText').value = '';
+                msg.textContent = `✅ ${adicionados} usuário(s) liberado(s)!`;
+                msg.style.color = '#00a859';
+            } else {
+                msg.textContent = '⚠️ Nenhum usuário novo (já liberados ou vazio).';
+                msg.style.color = '#ce2b37';
+            }
+            setTimeout(() => { msg.style.color = '#ffffff'; msg.textContent = ''; }, 4000);
+        }
+        function limparUsuariosLiberados() { usuariosLiberadosRef.set([]); }
         const ADMIN_USER = "admin", ADMIN_PASS = "123";
         let loggedUser = null;
         let dadosCarregados = false;
@@ -771,7 +769,27 @@
             if (u === ADMIN_USER && p === ADMIN_PASS) { loggedUser = { username: ADMIN_USER, isAdmin: true }; entrarNoSistema(); return; }
             if (!dadosCarregados) { document.getElementById('loginError').textContent = '⏳ Aguarde, carregando dados...'; setTimeout(() => attemptLogin(), 1000); return; }
             const ent = entregadoresData.find(e => e.nome.toLowerCase() === u.toLowerCase() && e.senha === p);
-            if (ent) { loggedUser = { username: ent.nome, isAdmin: false }; entrarNoSistema(); return; }
+            if (ent) {
+                const liberado = usuariosLiberadosData.some(l => l.toLowerCase() === u.toLowerCase());
+                if (liberado) {
+                    liberarAcessoRef.once('value').then((snap) => {
+                        const data = snap.val() || {};
+                        const agoraTimestamp = new Date().getTime();
+                        const lib = data.liberacao ? new Date(data.liberacao).getTime() : 0;
+                        const bloq = data.bloqueio ? new Date(data.bloqueio).getTime() : Infinity;
+                        if (lib === 0 && bloq === Infinity || (agoraTimestamp >= lib && agoraTimestamp < bloq)) {
+                            loggedUser = { username: ent.nome, isAdmin: false };
+                            entrarNoSistema();
+                        } else {
+                            document.getElementById('loginError').textContent = '⏰ Fora do período permitido';
+                        }
+                    });
+                    return;
+                } else {
+                    document.getElementById('loginError').textContent = '🔒 Seu acesso não foi liberado pelo admin';
+                    return;
+                }
+            }
             document.getElementById('loginError').textContent = '⚠️ ACESSO NEGADO';
             document.getElementById('passwordInput').value = ''; document.getElementById('passwordInput').focus();
         }
@@ -780,6 +798,7 @@
             document.getElementById('mainContent').classList.add('visible');
             document.getElementById('loggedUserDisplay').textContent = loggedUser.username;
             const isAdmin = loggedUser.isAdmin;
+            document.getElementById('itemLiberarAcesso').style.display = isAdmin ? 'flex' : 'none';
             document.getElementById('itemCadastroEntregadores').style.display = isAdmin ? 'flex' : 'none';
             document.getElementById('itemComandas').style.display = isAdmin ? 'flex' : 'none';
             updateCounts();
@@ -814,7 +833,6 @@
             }
             calcularTotalAutomatico();
         }
-        // ========== EVENTOS ==========
         document.getElementById('loginBtn').addEventListener('click', attemptLogin);
         document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
         document.getElementById('usernameInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordInput').focus(); });
@@ -834,6 +852,18 @@
                 if (loggedUser) { logout(); }
             }
         });
+        document.getElementById('itemLiberarAcesso').addEventListener('click', () => { document.getElementById('liberarAcessoModal').classList.add('active'); });
+        document.getElementById('saveHorariosBtn').addEventListener('click', () => {
+            const lib = document.getElementById('dataHoraLiberacao').value;
+            const bloq = document.getElementById('dataHoraBloqueio').value;
+            liberarAcessoRef.set({ liberacao: lib, bloqueio: bloq });
+            document.getElementById('horariosMsg').textContent = '✅ Datas e horários salvos!';
+            document.getElementById('horariosMsg').style.color = '#00a859';
+            setTimeout(() => { document.getElementById('horariosMsg').textContent = ''; }, 3000);
+        });
+        document.getElementById('importLiberarUsuariosBtn').addEventListener('click', importarUsuariosLiberados);
+        document.getElementById('clearLiberadosBtn').addEventListener('click', limparUsuariosLiberados);
+        document.getElementById('closeLiberarAcessoModal').addEventListener('click', () => document.getElementById('liberarAcessoModal').classList.remove('active'));
         document.getElementById('itemDiasRodados').addEventListener('click', () => { document.getElementById('calendarModal').classList.add('active'); renderCalendar(); });
         document.getElementById('prevMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); });
         document.getElementById('nextMonth').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); });
@@ -858,12 +888,10 @@
         document.getElementById('addBairroBtn').addEventListener('click', adicionarBairro);
         document.getElementById('importBairrosBtn').addEventListener('click', importarBairros);
         document.getElementById('closeBairrosModal').addEventListener('click', () => document.getElementById('bairrosModal').classList.remove('active'));
-        // Comandas
         document.getElementById('itemComandas').addEventListener('click', () => { document.getElementById('comandasModal').classList.add('active'); renderComandas(); });
         document.getElementById('importComandasTxtBtn').addEventListener('click', importarComandasTxt);
         document.getElementById('clearComandasBtn').addEventListener('click', limparComandas);
         document.getElementById('closeComandasModal').addEventListener('click', () => document.getElementById('comandasModal').classList.remove('active'));
-        // Entregadores
         document.getElementById('itemCadastroEntregadores').addEventListener('click', () => { document.getElementById('entregadoresModal').classList.add('active'); renderEntregadoresLista(); document.getElementById('entregadorNome').focus(); });
         document.getElementById('addEntregadorBtn').addEventListener('click', realizarCadastroEntregador);
         document.getElementById('closeEntregadoresModal').addEventListener('click', () => document.getElementById('entregadoresModal').classList.remove('active'));
@@ -876,16 +904,9 @@
         let progress = 0;
         const loadingInterval = setInterval(() => {
             progress += Math.floor(Math.random()*8)+2;
-            if (progress >= 100) {
-                progress = 100; clearInterval(loadingInterval);
-                document.getElementById('loaderBar').style.width = '100%';
-                document.getElementById('loadingPercent').textContent = '100%';
-                setTimeout(() => {
-                    document.getElementById('loadingScreen').classList.add('hidden');
-                    document.getElementById('loginScreen').classList.remove('hidden');
-                    document.getElementById('usernameInput').focus();
-                }, 600);
-            } else { document.getElementById('loaderBar').style.width = progress+'%'; document.getElementById('loadingPercent').textContent = progress+'%'; }
+            if (progress >= 100) { progress = 100; clearInterval(loadingInterval); document.getElementById('loaderBar').style.width = '100%'; document.getElementById('loadingPercent').textContent = '100%';
+                setTimeout(() => { document.getElementById('loadingScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden'); document.getElementById('usernameInput').focus(); }, 600); }
+            else { document.getElementById('loaderBar').style.width = progress+'%'; document.getElementById('loadingPercent').textContent = progress+'%'; }
         }, 100);
         const canvas = document.getElementById('particlesCanvas'), ctx = canvas.getContext('2d');
         let particles = [];
