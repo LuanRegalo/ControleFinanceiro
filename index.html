@@ -411,17 +411,48 @@
         let currentDate = new Date();
         let selectedDays = new Set();
         let usuarioSelecionadoAtual = '';
+
+        // 🔧 Função para remover parênteses e espaços extras dos nomes de bairros
+        function limparNomeBairro(nome) {
+            if (!nome) return nome;
+            // Remove tudo que está entre parênteses (incluindo os parênteses)
+            let limpo = nome.replace(/\(.*?\)/g, '');
+            // Remove espaços múltiplos e das bordas
+            limpo = limpo.replace(/\s+/g, ' ').trim();
+            return limpo;
+        }
+
         const statusDot = document.getElementById('statusDot');
         const statusText = document.getElementById('statusText');
         database.ref('.info/connected').on('value', (snap) => {
             if (snap.val() === true) { statusDot.className = 'status-dot online'; statusText.textContent = 'Conectado'; }
             else { statusDot.className = 'status-dot offline'; statusText.textContent = 'Offline'; }
         });
+
         bairrosRef.on('value', (snapshot) => {
-            bairrosData = snapshot.val() || [];
-            if (!Array.isArray(bairrosData)) { bairrosData = Object.values(bairrosData); }
-            renderBairrosTableIfOpen(); updateCounts();
+            let rawData = snapshot.val() || [];
+            if (!Array.isArray(rawData)) { rawData = Object.values(rawData); }
+
+            // Aplica a limpeza automaticamente em todos os nomes
+            let changed = false;
+            bairrosData = rawData.map(b => {
+                const nomeLimpo = limparNomeBairro(b.nome);
+                if (nomeLimpo !== b.nome) {
+                    changed = true;
+                    return { ...b, nome: nomeLimpo };
+                }
+                return b;
+            });
+
+            // Se houve alteração, salva de volta no Firebase (sem loop porque os nomes já ficam limpos)
+            if (changed) {
+                bairrosRef.set(bairrosData);
+            }
+
+            renderBairrosTableIfOpen();
+            updateCounts();
         });
+
         entregadoresRef.on('value', (snapshot) => {
             entregadoresData = snapshot.val() || [];
             if (!Array.isArray(entregadoresData)) { entregadoresData = Object.values(entregadoresData); }
@@ -607,16 +638,35 @@
             document.getElementById('adminClearSection').style.display = isAdmin ? 'block' : 'none';
         }
         function saveBairros(arr) { bairrosRef.set(arr); }
+
         function parseLinhaBairro(linha) {
             linha = linha.trim(); if (!linha) return null;
             let parts = linha.split(';');
-            if (parts.length >= 2) { const nome = parts[0].trim(); const valorStr = parts[1].trim().replace('R$', '').replace(/\./g, '').replace(',', '.'); const valor = parseFloat(valorStr); if (nome && !isNaN(valor) && valor >= 0) return { nome, taxa: valor }; }
+            if (parts.length >= 2) {
+                const nome = limparNomeBairro(parts[0].trim());
+                const valorStr = parts[1].trim().replace('R$', '').replace(/\./g, '').replace(',', '.');
+                const valor = parseFloat(valorStr);
+                if (nome && !isNaN(valor) && valor >= 0) return { nome, taxa: valor };
+            }
             const match = linha.match(/^(.+?)\s+R?\$?\s*([\d,.]+)\s*$/);
-            if (match) { const nome = match[1].trim(); const valorStr = match[2].replace('R$', '').replace(/\./g, '').replace(',', '.'); const valor = parseFloat(valorStr); if (nome && !isNaN(valor) && valor >= 0) return { nome, taxa: valor }; }
+            if (match) {
+                const nome = limparNomeBairro(match[1].trim());
+                const valorStr = match[2].replace('R$', '').replace(/\./g, '').replace(',', '.');
+                const valor = parseFloat(valorStr);
+                if (nome && !isNaN(valor) && valor >= 0) return { nome, taxa: valor };
+            }
             const tokens = linha.split(/\s+/);
-            if (tokens.length >= 2) { const ultimo = tokens[tokens.length-1].replace('R$', '').replace(',', '.'); const valor = parseFloat(ultimo); if (!isNaN(valor) && valor >= 0) { const nome = tokens.slice(0, -1).join(' '); return { nome, taxa: valor }; } }
+            if (tokens.length >= 2) {
+                const ultimo = tokens[tokens.length-1].replace('R$', '').replace(',', '.');
+                const valor = parseFloat(ultimo);
+                if (!isNaN(valor) && valor >= 0) {
+                    const nome = limparNomeBairro(tokens.slice(0, -1).join(' '));
+                    return { nome, taxa: valor };
+                }
+            }
             return null;
         }
+
         function importarBairros() {
             if (!loggedUser || !loggedUser.isAdmin) return;
             const text = document.getElementById('importBairrosText').value.trim();
@@ -625,14 +675,28 @@
             const lines = text.split('\n').filter(line => line.trim() !== '');
             let novos = 0, erros = 0;
             const novosBairros = [];
-            for (let line of lines) { const parsed = parseLinhaBairro(line); if (!parsed) { erros++; continue; } if (bairrosData.some(b => b.nome.toLowerCase() === parsed.nome.toLowerCase())) { erros++; continue; } novosBairros.push(parsed); novos++; }
-            if (novos > 0) { const atualizados = [...bairrosData, ...novosBairros]; saveBairros(atualizados); msg.textContent = `✅ ${novos} bairro(s) importado(s)!`; msg.style.color = '#00a859'; document.getElementById('importBairrosText').value = ''; }
-            else { msg.textContent = `⚠️ Nenhum bairro novo (${erros} erros/duplicados).`; msg.style.color = '#ce2b37'; }
+            for (let line of lines) {
+                const parsed = parseLinhaBairro(line);
+                if (!parsed) { erros++; continue; }
+                if (bairrosData.some(b => b.nome.toLowerCase() === parsed.nome.toLowerCase())) { erros++; continue; }
+                novosBairros.push(parsed); novos++;
+            }
+            if (novos > 0) {
+                const atualizados = [...bairrosData, ...novosBairros];
+                saveBairros(atualizados);
+                msg.textContent = `✅ ${novos} bairro(s) importado(s)!`;
+                msg.style.color = '#00a859';
+                document.getElementById('importBairrosText').value = '';
+            } else {
+                msg.textContent = `⚠️ Nenhum bairro novo (${erros} erros/duplicados).`;
+                msg.style.color = '#ce2b37';
+            }
             setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 4000);
         }
+
         function adicionarBairro() {
             if (!loggedUser || !loggedUser.isAdmin) return;
-            const nome = document.getElementById('novoBairroNome').value.trim();
+            const nome = limparNomeBairro(document.getElementById('novoBairroNome').value.trim());
             const taxa = parseFloat(document.getElementById('novoBairroTaxa').value);
             const msg = document.getElementById('bairroMsg');
             if (!nome || isNaN(taxa)) { msg.textContent = '⚠️ Preencha todos os campos.'; msg.style.color = '#ce2b37'; return; }
@@ -643,6 +707,7 @@
             msg.textContent = '✅ Bairro adicionado!'; msg.style.color = '#00a859';
             setTimeout(() => { msg.style.color = 'rgba(180,200,220,0.7)'; }, 3000);
         }
+
         function abrirConfirmClear() { document.getElementById('confirmModal').classList.add('active'); }
         function fecharConfirmClear() { document.getElementById('confirmModal').classList.remove('active'); }
         function executarLimpeza() { saveBairros([]); fecharConfirmClear(); document.getElementById('clearMsg').textContent = '✅ Todos os bairros foram removidos.'; document.getElementById('clearMsg').style.color = '#00a859'; setTimeout(() => { document.getElementById('clearMsg').textContent = ''; }, 3000); }
