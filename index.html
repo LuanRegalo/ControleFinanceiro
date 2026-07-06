@@ -123,10 +123,7 @@
         .bairros-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
         .bairros-table th, .bairros-table td { padding: 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); color: #d0d8e0; font-size: 0.8rem; }
         .bairros-table th { color: var(--green); font-size: 0.7rem; letter-spacing: 2px; }
-        .bairros-table button, .bairros-table .edit-icon { background: rgba(0,168,89,0.15); border: 1px solid rgba(0,168,89,0.5); color: var(--green); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; margin-right: 4px; }
-        .bairros-table .save-edit, .bairros-table .cancel-edit { font-size: 0.8rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-        .bairros-table .save-edit { background: rgba(0,168,89,0.3); border: 1px solid var(--green); color: var(--green); }
-        .bairros-table .cancel-edit { background: rgba(206,43,55,0.2); border: 1px solid rgba(206,43,55,0.5); color: var(--red); }
+        .bairros-table button { background: rgba(206,43,55,0.2); border: 1px solid rgba(206,43,55,0.5); color: var(--red); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
         textarea.futuristic-input { height: 120px; resize: vertical; font-size: 0.75rem; line-height: 1.6; }
         .admin-section { display: none; }
         .confirm-box { text-align: center; max-width: 350px; padding: 30px; }
@@ -182,7 +179,6 @@
         .usuarios-liberados-list { max-height: 200px; overflow-y: auto; margin-top: 10px; }
         .usuario-liberado-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #d0d8e0; font-size: 0.75rem; }
         .usuario-liberado-item button { background: rgba(206,43,55,0.2); border: 1px solid rgba(206,43,55,0.5); color: var(--red); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.6rem; }
-        .editable-cell input { width: 100%; padding: 4px; background: rgba(20,20,35,0.8); border: 1px solid var(--green); border-radius: 4px; color: white; font-size: 0.8rem; }
         @media (max-width: 600px) { .main-container { padding: 25px 18px; } .main-title { font-size: 1.3rem; } }
     </style>
 </head>
@@ -617,63 +613,16 @@
         }
         function ordenarBairros() { bairrosData.sort((a, b) => a.taxa - b.taxa); }
 
-        // Função para iniciar edição inline de um bairro
-        function editarBairro(index) {
-            const row = document.querySelector(`#bairrosTable tbody tr[data-index="${index}"]`);
-            if (!row || row.classList.contains('editing')) return;
-            row.classList.add('editing');
-            const bairro = bairrosData[index];
-            const cells = row.querySelectorAll('td');
-            // Nome
-            cells[0].innerHTML = `<div class="editable-cell"><input type="text" class="edit-nome" value="${bairro.nome}"></div>`;
-            // Taxa
-            cells[1].innerHTML = `<div class="editable-cell"><input type="number" class="edit-taxa" step="0.01" value="${bairro.taxa.toFixed(2)}"></div>`;
-            // Ações
-            cells[2].innerHTML = `<button class="save-edit" data-index="${index}">✅</button><button class="cancel-edit" data-index="${index}">❌</button>`;
-            document.querySelector(`.save-edit[data-index="${index}"]`).addEventListener('click', salvarEdicao);
-            document.querySelector(`.cancel-edit[data-index="${index}"]`).addEventListener('click', cancelarEdicao);
-        }
-
-        function salvarEdicao(e) {
-            const index = parseInt(e.target.getAttribute('data-index'));
-            const row = document.querySelector(`#bairrosTable tbody tr[data-index="${index}"]`);
-            const novoNome = row.querySelector('.edit-nome').value.trim();
-            const novaTaxa = parseFloat(row.querySelector('.edit-taxa').value);
-            if (!novoNome || isNaN(novaTaxa) || novaTaxa < 0) {
-                alert('Nome ou taxa inválidos.');
-                return;
-            }
-            // Verificar duplicidade (exceto o próprio)
-            if (bairrosData.some((b, i) => i !== index && b.nome.toLowerCase() === novoNome.toLowerCase())) {
-                alert('Já existe um bairro com esse nome.');
-                return;
-            }
-            bairrosData[index].nome = limparNomeBairro(novoNome);
-            bairrosData[index].taxa = novaTaxa;
-            saveBairros(bairrosData);
-            // O listener do Firebase vai recarregar a tabela automaticamente, mas podemos forçar renderização imediata
-            renderBairrosTable();
-        }
-
-        function cancelarEdicao(e) {
-            const index = parseInt(e.target.getAttribute('data-index'));
-            // Apenas recarrega a tabela original
-            renderBairrosTable();
-        }
-
         function renderBairrosTable() {
             ordenarBairros();
             const tbody = document.querySelector('#bairrosTable tbody');
             const isAdmin = loggedUser && loggedUser.isAdmin;
             document.getElementById('thAcoes').style.display = isAdmin ? 'table-cell' : 'none';
             tbody.innerHTML = bairrosData.map((b, index) => `
-                <tr data-index="${index}">
+                <tr>
                     <td>${b.nome}</td>
                     <td>${b.taxa.toFixed(2)}</td>
-                    ${isAdmin ? `<td>
-                        <button class="edit-icon" data-index="${index}" title="Editar">✏️</button>
-                        <button class="remove-bairro" data-index="${index}">🗑️</button>
-                    </td>` : '<td></td>'}
+                    ${isAdmin ? `<td><button class="remove-bairro" data-index="${index}">🗑️</button></td>` : '<td></td>'}
                 </tr>`).join('');
             document.getElementById('bairrosCount').textContent = bairrosData.length;
             if (isAdmin) {
@@ -684,12 +633,6 @@
                         saveBairros(bairrosData);
                         renderBairrosTable();
                     };
-                });
-                document.querySelectorAll('.edit-icon').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const index = parseInt(e.target.getAttribute('data-index'));
-                        editarBairro(index);
-                    });
                 });
             }
             document.getElementById('adminImportSection').style.display = isAdmin ? 'block' : 'none';
