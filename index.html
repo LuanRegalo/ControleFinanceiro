@@ -442,7 +442,6 @@
             renderUsuariosLiberadosLista();
         });
 
-        // 🔧 Listener dedicado para entregador logado
         function iniciarListenerUsuarioLogado() {
             if (loggedUser && !loggedUser.isAdmin) {
                 taxasPorUsuarioRef.child(loggedUser.username).off();
@@ -580,25 +579,56 @@
             return {data,motoboy,numero,bairro,horario,grupo:grupo.charAt(0).toUpperCase()+grupo.slice(1).toLowerCase(),valor,timestamp:new Date().toISOString()};
         }
 
-        // 🔁 Cálculo das taxas com correspondência exata ao nome cadastrado
         function recalcularTaxasComandas(){
             comandasRef.once('value').then(snap=>{
                 const comandas=snap.val()||[]; if(!Array.isArray(comandas)) return;
-                const totais={}; // chave: nome em minúsculas, valor: soma
-                comandas.forEach(c=>{ if(c.motoboy&&c.valor){ const chave=c.motoboy.trim().toLowerCase(); totais[chave]=(totais[chave]||0)+parseFloat(c.valor); } });
-                const updates={};
-                let atualizados=0;
-                // Procura o nome exato no cadastro de entregadores
-                for(const [chave, total] of Object.entries(totais)){
+                const totais={}; comandas.forEach(c=>{ if(c.motoboy&&c.valor){ const chave=c.motoboy.trim().toLowerCase(); totais[chave]=(totais[chave]||0)+parseFloat(c.valor); } });
+                const updates={}; let atualizados=0;
+                for(const [chave,total] of Object.entries(totais)){
                     const ent = entregadoresData.find(e => e.nome.toLowerCase() === chave);
                     const nomeExato = ent ? ent.nome : (comandas.find(c=>c.motoboy&&c.motoboy.trim().toLowerCase()===chave)?.motoboy.trim() || chave);
-                    updates[nomeExato] = { taxas: total };
-                    atualizados++;
+                    updates[nomeExato] = { taxas: total }; atualizados++;
                 }
                 if(atualizados>0) taxasPorUsuarioRef.update(updates);
                 const msg=document.getElementById('comandasImportMsg');
                 if(msg&&msg.textContent.includes('importada')){ msg.textContent=msg.textContent.replace(/\s*\|\s*Taxas.*$/,'')+` | Taxas de ${atualizados} motoboy(s) atualizadas.`; msg.style.color='#00a859'; }
             });
+        }
+
+        // NOVA FUNÇÃO: marcar datas das comandas nos dias rodados
+        function marcarDiasRodados(comandas) {
+            if (!comandas || comandas.length === 0) return;
+            const updates = {};
+            comandas.forEach(c => {
+                if (!c.data) return;
+                let ano, mes, dia;
+                if (c.data.includes('/')) {
+                    const partes = c.data.split('/');
+                    if (partes.length === 3) {
+                        dia = parseInt(partes[0], 10);
+                        mes = parseInt(partes[1], 10) - 1;
+                        ano = parseInt(partes[2], 10);
+                        if (ano < 100) ano += 2000;
+                    }
+                } else if (c.data.includes('-')) {
+                    const dataObj = new Date(c.data + 'T00:00:00');
+                    if (!isNaN(dataObj.getTime())) {
+                        ano = dataObj.getFullYear();
+                        mes = dataObj.getMonth();
+                        dia = dataObj.getDate();
+                    }
+                }
+                if (ano !== undefined && mes !== undefined && dia !== undefined) {
+                    const dataValida = new Date(ano, mes, dia);
+                    if (dataValida.getFullYear() === ano && dataValida.getMonth() === mes && dataValida.getDate() === dia) {
+                        const key = `${ano}-${String(mes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+                        updates[key] = true;
+                    }
+                }
+            });
+            if (Object.keys(updates).length > 0) {
+                diasRodadosRef.update(updates);
+            }
         }
 
         function importarComandasTxt(){
@@ -612,6 +642,7 @@
                     document.getElementById('comandasImportText').value='';
                     msg.textContent=`✅ ${importadas} comanda(s) importada(s)!${erros>0?` (${erros} erros)` : ''}`; msg.style.color='#00a859';
                     recalcularTaxasComandas();
+                    marcarDiasRodados(novas); // NOVA CHAMADA
                 });
             }else{ msg.textContent=`⚠️ Nenhuma válida (${erros} erros).`; msg.style.color='#ce2b37'; }
             setTimeout(()=>{if(msg.style.color!=='#ce2b37') msg.textContent='';},6000);
