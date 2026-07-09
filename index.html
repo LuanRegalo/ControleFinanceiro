@@ -228,7 +228,7 @@
         </ul>
     </div>
 
-    <!-- MODAIS COMPLETOS -->
+    <!-- Modais completos (sem placeholders) -->
     <div id="liberarAcessoModal" class="modal-overlay">
         <div class="modal-box" style="max-width:600px;">
             <div class="modal-header"><span class="modal-title">🟢 LIBERAR ACESSO</span><button class="modal-close" id="closeLiberarAcessoModal">✕</button></div>
@@ -414,9 +414,14 @@
             entregadoresData = snap.val() || []; if (!Array.isArray(entregadoresData)) entregadoresData = Object.values(entregadoresData);
             renderEntregadoresListaIfOpen(); updateCounts(); atualizarSelectUsuarios();
         });
+        // Listener principal: sempre que comandas mudam, recalcula taxas e dias rodados
         comandasRef.on('value', snap => {
-            comandasData = snap.val() || []; if (!Array.isArray(comandasData)) comandasData = Object.values(comandasData);
-            renderComandasIfOpen(); updateCounts();
+            comandasData = snap.val() || [];
+            if (!Array.isArray(comandasData)) comandasData = Object.values(comandasData);
+            renderComandasIfOpen();
+            updateCounts();
+            recalcularTaxasComandas();    // atualiza taxas automaticamente
+            marcarDiasRodados(comandasData); // atualiza calendário com todas as comandas atuais
         });
         diasRodadosRef.on('value', snap => {
             const d = snap.val(); selectedDays = d ? new Set(Object.keys(d).filter(k => d[k])) : new Set();
@@ -452,7 +457,7 @@
                     document.getElementById('descontosInput').value = d.descontos || 0;
                     calcularTotalAutomatico();
                     const info = document.getElementById('taxesInfo');
-                    if (info) { info.textContent = '👤 Seus dados (atualizados das comandas)'; info.style.color = '#00a859'; }
+                    if (info) { info.textContent = '👤 Seus dados (atualizados automaticamente)'; info.style.color = '#00a859'; }
                 });
             }
         }
@@ -579,25 +584,32 @@
             return {data,motoboy,numero,bairro,horario,grupo:grupo.charAt(0).toUpperCase()+grupo.slice(1).toLowerCase(),valor,timestamp:new Date().toISOString()};
         }
 
+        // Recalcula totais de comandas por motoboy e atualiza taxas
         function recalcularTaxasComandas(){
-            comandasRef.once('value').then(snap=>{
-                const comandas=snap.val()||[]; if(!Array.isArray(comandas)) return;
-                const totais={}; comandas.forEach(c=>{ if(c.motoboy&&c.valor){ const chave=c.motoboy.trim().toLowerCase(); totais[chave]=(totais[chave]||0)+parseFloat(c.valor); } });
-                const updates={}; let atualizados=0;
-                for(const [chave,total] of Object.entries(totais)){
-                    const ent = entregadoresData.find(e => e.nome.toLowerCase() === chave);
-                    const nomeExato = ent ? ent.nome : (comandas.find(c=>c.motoboy&&c.motoboy.trim().toLowerCase()===chave)?.motoboy.trim() || chave);
-                    updates[nomeExato] = { taxas: total }; atualizados++;
+            const totais = {};
+            comandasData.forEach(c => {
+                if (c.motoboy && c.valor) {
+                    const chave = c.motoboy.trim().toLowerCase();
+                    totais[chave] = (totais[chave] || 0) + parseFloat(c.valor);
                 }
-                if(atualizados>0) taxasPorUsuarioRef.update(updates);
-                const msg=document.getElementById('comandasImportMsg');
-                if(msg&&msg.textContent.includes('importada')){ msg.textContent=msg.textContent.replace(/\s*\|\s*Taxas.*$/,'')+` | Taxas de ${atualizados} motoboy(s) atualizadas.`; msg.style.color='#00a859'; }
             });
+            const updates = {};
+            for (const [chave, total] of Object.entries(totais)) {
+                const ent = entregadoresData.find(e => e.nome.toLowerCase() === chave);
+                const nomeExato = ent ? ent.nome : chave;
+                updates[nomeExato] = { taxas: total };
+            }
+            // Se não há comandas, zera taxas de todos os entregadores conhecidos
+            if (comandasData.length === 0) {
+                entregadoresData.forEach(e => { updates[e.nome] = { taxas: 0 }; });
+            }
+            if (Object.keys(updates).length > 0) {
+                taxasPorUsuarioRef.update(updates);
+            }
         }
 
-        // NOVA FUNÇÃO: marcar datas das comandas nos dias rodados
+        // Atualiza dias rodados com base nas datas das comandas atuais
         function marcarDiasRodados(comandas) {
-            if (!comandas || comandas.length === 0) return;
             const updates = {};
             comandas.forEach(c => {
                 if (!c.data) return;
@@ -641,8 +653,7 @@
                 comandasRef.set([...comandasData,...novas]).then(()=>{
                     document.getElementById('comandasImportText').value='';
                     msg.textContent=`✅ ${importadas} comanda(s) importada(s)!${erros>0?` (${erros} erros)` : ''}`; msg.style.color='#00a859';
-                    recalcularTaxasComandas();
-                    marcarDiasRodados(novas); // NOVA CHAMADA
+                    // recálculo e marcação de dias são feitos automaticamente pelo listener
                 });
             }else{ msg.textContent=`⚠️ Nenhuma válida (${erros} erros).`; msg.style.color='#ce2b37'; }
             setTimeout(()=>{if(msg.style.color!=='#ce2b37') msg.textContent='';},6000);
